@@ -1,0 +1,39 @@
+From 5b2ba18a864494fbf22b0a3ad6119a8b3d7383e3 Mon Sep 17 00:00:00 2001
+From: Joshua-Riek <jjriek@verizon.net>
+Date: Sat, 4 Nov 2023 19:05:14 -0400
+Subject: [PATCH 2/3] arm64: dts: rockchip: turing-rk1: pull down
+ emmc_data_strobe to fix HS400
+
+---
+ arch/arm64/boot/dts/rockchip/rk3588-turing-rk1.dtsi | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/rockchip/rk3588-turing-rk1.dtsi b/arch/arm64/boot/dts/rockchip/rk3588-turing-rk1.dtsi
+index 3f10f44a7d74..728ff86ce355 100644
+--- a/arch/arm64/boot/dts/rockchip/rk3588-turing-rk1.dtsi
++++ b/arch/arm64/boot/dts/rockchip/rk3588-turing-rk1.dtsi
+@@ -273,6 +273,12 @@ vcc3v3_pcie30_en: pcie3-reg {
+ 		};
+ 	};
+ 
++	emmc {
++		emmc_data_strobe: emmc-data-strobe {
++			rockchip,pins = <2 RK_PA2 1 &pcfg_pull_down>;
++		};
++	};
++
+ 	rtl8211f {
+ 		rtl8211f_rst: rtl8211f-rst {
+ 			rockchip,pins = <3 RK_PB7 RK_FUNC_GPIO &pcfg_pull_none>;
+@@ -291,6 +297,8 @@ &sdhci {
+ 	non-removable;
+ 	mmc-hs400-1_8v;
+ 	mmc-hs400-enhanced-strobe;
++	pinctrl-names = "default";
++	pinctrl-0 = <&emmc_data_strobe>;
+ 	status = "okay";
+ };
+ 
+-- 
+2.25.1
+

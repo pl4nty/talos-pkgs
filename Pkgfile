@@ -146,6 +146,10 @@ vars:
   raspberrypi_firmware_sha256: 08b208bf715d0379a93d38f20aed409cbe2e12c1dc27e3a3794416faefde1aa9
   raspberrypi_firmware_sha512: ddc9baeba4e2e442bfe41e427c7ecdd38ee6d44ac4e7c297ae7d5a6c64b0aa1a81206929baeb9aceb74de6f96707b30040e82450ef4f01a78b958299c72e3857
 
+  rockchip_rk3588_ddr_version: 1.12
+  rockchip_rk3588_ddr_sha256: ab20fa76d5535bb95c427b117b242510316b8c27889639dd0c4c2a44832cfb2f
+  rockchip_rk3588_ddr_sha512: f71a2c4489495721f846e7dc07c3d996c412b5113fc03bcc70a38e0d23653c3215d07e85c9f7a0e55318d7bd625eb12476b7aead9cdaacdb888d96cbaa2f3191
+
   # renovate: datasource=github-tags depName=opencontainers/runc
   runc_version: v1.1.10
   runc_ref: 18a0cb0f32bcac2ecc9a10f327d282759c144dab
@@ -172,10 +176,15 @@ vars:
   arm_trusted_firmware_sha256: 60fad60eeb6840097f8e64f16093c06ddb2ef269c7a22affed02beaa6cefe466
   arm_trusted_firmware_sha512: 958cf8f9e258638e59d0fbd8b053fce7d8a9ea2fc922686c9d20ea16f79f55219ac18a12ab240c528ee98e49c2e0eef4c963fdb255cc14b92437a5b3cffc8640
 
+  # renovate: datasource=github-refs depName=git.trustedfirmware.org/TF-A/trusted-firmware-a
+  arm_trusted_firmware_rk3588_ref: ef131ac2398ea21032a570f32b4cf4baafd3b29e
+  arm_trusted_firmware_rk3588_sha256: 8d356313f12b9b48dcf0c6b3f0811ae8230863600f55576616848d5f8b5106af
+  arm_trusted_firmware_rk3588_sha512: 3dd096bd66a0ed0dd0937ad497a86714bbac072f7d27471bb9fc911b3fa79445a404b4c511f12f0323be6e2509b93d8c38180ee7e95a6e6ad8480ea2c9a0bc03
+
   # renovate: datasource=github-tags extractVersion=^v(?<version>.*)$ depName=u-boot/u-boot
-  uboot_version: 2023.01
-  uboot_sha256: 69423bad380f89a0916636e89e6dcbd2e4512d584308d922d1039d1e4331950f
-  uboot_sha512: 417a28267eb7875820d08fafc7316f164663609378637539e71648b0b9b7d28796b6c381717f31b0ab6472805fefd32628ef7d1b2e7b9f3c51c8ad122993f679
+  uboot_version: 2024.01-rc1
+  uboot_sha256: c2adf08e91c4bc3f6b7070029c4c6aefd9b04ea77d5260c6844d2a7e8cc49ae2
+  uboot_sha512: 3bd559dcad2396693a76c67ac55b957b4ff3573d38cbe84e09ba1c0944b5a44ebf08bf51b23fb9caefe40b7430095db756603d8828502a30dd6970f909bc0e3e
 
   # renovate: datasource=git-tags extractVersion=^v(?<version>.*)$ depName=git://git.kernel.org/pub/scm/utils/util-linux/util-linux.git
   util_linux_version: 2.39.2

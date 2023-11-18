@@ -16,6 +16,9 @@ steps:
         tar -xzf linux.tar.gz --strip-components=1
         rm linux.tar.gz
 
+        patch -p1 < /pkg/turing_rk1/0001-arm64-dts-turing-rk1-add-clkreqn-pinctrl-to-pcie3x4-.patch
+        patch -p1 < /pkg/turing_rk1/0002-arm64-dts-rockchip-turing-rk1-pull-down-emmc_data_st.patch
+
         mkdir /bin
         ln -sv /toolchain/bin/bash /bin/bash
         ln -sv /toolchain/bin/bash /bin/sh

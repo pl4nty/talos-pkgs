@@ -1,0 +1,116 @@
+From patchwork Wed Nov  8 17:25:40 2023
+Content-Type: text/plain; charset="utf-8"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+X-Patchwork-Submitter: Quentin Schulz <foss+uboot@0leil.net>
+X-Patchwork-Id: 1861740
+X-Patchwork-Delegate: ykai007@gmail.com
+Return-Path: <u-boot-bounces@lists.denx.de>
+X-Original-To: incoming@patchwork.ozlabs.org
+Delivered-To: patchwork-incoming@legolas.ozlabs.org
+Authentication-Results: legolas.ozlabs.org;
+ spf=pass (sender SPF authorized) smtp.mailfrom=lists.denx.de
+ (client-ip=2a01:238:438b:c500:173d:9f52:ddab:ee01; helo=phobos.denx.de;
+ envelope-from=u-boot-bounces@lists.denx.de; receiver=patchwork.ozlabs.org)
+Received: from phobos.denx.de (phobos.denx.de
+ [IPv6:2a01:238:438b:c500:173d:9f52:ddab:ee01])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature ECDSA (secp384r1))
+	(No client certificate requested)
+	by legolas.ozlabs.org (Postfix) with ESMTPS id 4SQX7s4bYnz1yRF
+	for <incoming@patchwork.ozlabs.org>; Thu,  9 Nov 2023 04:26:49 +1100 (AEDT)
+Received: from h2850616.stratoserver.net (localhost [IPv6:::1])
+	by phobos.denx.de (Postfix) with ESMTP id 15DEA8764E;
+	Wed,  8 Nov 2023 18:26:09 +0100 (CET)
+Authentication-Results: phobos.denx.de;
+ dmarc=none (p=none dis=none) header.from=0leil.net
+Authentication-Results: phobos.denx.de;
+ spf=pass smtp.mailfrom=u-boot-bounces@lists.denx.de
+Received: by phobos.denx.de (Postfix, from userid 109)
+ id 7E50487664; Wed,  8 Nov 2023 18:26:07 +0100 (CET)
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on phobos.denx.de
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.9 required=5.0 tests=BAYES_00,RCVD_IN_MSPIKE_H5,
+ RCVD_IN_MSPIKE_WL,SPF_HELO_PASS,SPF_NONE,T_SCC_BODY_TEXT_LINE
+ autolearn=ham autolearn_force=no version=3.4.2
+Received: from relay6-d.mail.gandi.net (relay6-d.mail.gandi.net
+ [217.70.183.198])
+ (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+ (No client certificate requested)
+ by phobos.denx.de (Postfix) with ESMTPS id 8C54C87450
+ for <u-boot@lists.denx.de>; Wed,  8 Nov 2023 18:26:05 +0100 (CET)
+Authentication-Results: phobos.denx.de;
+ dmarc=none (p=none dis=none) header.from=0leil.net
+Authentication-Results: phobos.denx.de;
+ spf=none smtp.mailfrom=foss+uboot@0leil.net
+Received: by mail.gandi.net (Postfix) with ESMTPSA id 4A0CEC0003;
+ Wed,  8 Nov 2023 17:26:04 +0000 (UTC)
+From: Quentin Schulz <foss+uboot@0leil.net>
+To: Simon Glass <sjg@chromium.org>,
+ Philipp Tomsich <philipp.tomsich@vrull.eu>,
+ Kever Yang <kever.yang@rock-chips.com>
+Cc: Quentin Schulz <foss+uboot@0leil.net>, u-boot@lists.denx.de,
+ jonas@kwiboo.se, Quentin Schulz <quentin.schulz@theobroma-systems.com>,
+ heiko@sntech.de
+Subject: [PATCH next v2 4/6] rockchip: rk3588: insert u-boot,
+ spl-boot-device into U-Boot device tree
+Date: Wed,  8 Nov 2023 18:25:40 +0100
+Message-ID: 
+ <20231108-rk3588-spl-boot-dev-v2-4-e67e26202c85@theobroma-systems.com>
+X-Mailer: git-send-email 2.41.0
+In-Reply-To: 
+ <20231108-rk3588-spl-boot-dev-v2-0-e67e26202c85@theobroma-systems.com>
+References: 
+ <20231108-rk3588-spl-boot-dev-v2-0-e67e26202c85@theobroma-systems.com>
+MIME-Version: 1.0
+X-Mailer: b4 0.12.4
+X-GND-Sasl: foss@0leil.net
+X-BeenThere: u-boot@lists.denx.de
+X-Mailman-Version: 2.1.39
+Precedence: list
+List-Id: U-Boot discussion <u-boot.lists.denx.de>
+List-Unsubscribe: <https://lists.denx.de/options/u-boot>,
+ <mailto:u-boot-request@lists.denx.de?subject=unsubscribe>
+List-Archive: <https://lists.denx.de/pipermail/u-boot/>
+List-Post: <mailto:u-boot@lists.denx.de>
+List-Help: <mailto:u-boot-request@lists.denx.de?subject=help>
+List-Subscribe: <https://lists.denx.de/listinfo/u-boot>,
+ <mailto:u-boot-request@lists.denx.de?subject=subscribe>
+Errors-To: u-boot-bounces@lists.denx.de
+Sender: "U-Boot" <u-boot-bounces@lists.denx.de>
+X-Virus-Scanned: clamav-milter 0.103.8 at phobos.denx.de
+X-Virus-Status: Clean
+
+From: Quentin Schulz <quentin.schulz@theobroma-systems.com>
+
+It is possible to boot U-Boot proper from a different storage medium
+than the one used by the BOOTROM to load the SPL. This information is
+stored in the u-boot,spl-boot-device Device Tree property and is
+accessible from U-Boot proper so that it has knowledge at runtime where
+it was loaded from.
+
+Let's add support for this feature for rk3588 the same way it was done
+for px30 and rk3399.
+
+Cc: Quentin Schulz <foss+uboot@0leil.net>
+Signed-off-by: Quentin Schulz <quentin.schulz@theobroma-systems.com>
+---
+ arch/arm/mach-rockchip/rk3588/rk3588.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/arch/arm/mach-rockchip/rk3588/rk3588.c b/arch/arm/mach-rockchip/rk3588/rk3588.c
+index b1f535fad50..fde5f281b0a 100644
+--- a/arch/arm/mach-rockchip/rk3588/rk3588.c
++++ b/arch/arm/mach-rockchip/rk3588/rk3588.c
+@@ -175,3 +175,11 @@ int arch_cpu_init(void)
+ 	return 0;
+ }
+ #endif
++
++#if defined(CONFIG_SPL_BUILD) && !defined(CONFIG_TPL_BUILD)
++const char * const spl_boot_devices[BOOT_DEVICE_NONE + 1] = {
++	[BOOT_DEVICE_MMC2] = "/mmc@fe2e0000",
++	[BOOT_DEVICE_MMC1] = "/mmc@fe2c0000",
++	[BOOT_DEVICE_SPI] = "/spi@fe2b0000/flash@0",
++};
++#endif

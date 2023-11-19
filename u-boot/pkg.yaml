@@ -34,8 +34,7 @@ steps:
         destination: u-boot.tar.bz2
         sha256: "{{ .uboot_sha256 }}"
         sha512: "{{ .uboot_sha512 }}"
-      # Josh uses v1.11, does v1.12 work?
-      - url: https://raw.githubusercontent.com/rockchip-linux/rkbin/master/bin/rk35/rk3588_ddr_lp4_2112MHz_lp5_2736MHz_v{{ .rockchip_rk3588_ddr_version }}.bin
+      - url: https://github.com/Joshua-Riek/ubuntu-rockchip/raw/main/packages/u-boot-turing-rk3588/debian/rkbin/rk3588_ddr_lp4_2112MHz_lp5_2736MHz_v{{ .rockchip_rk3588_ddr_version }}.bin
         destination: rockchip_rk3588_ddr.bin
         sha256: "{{ .rockchip_rk3588_ddr_sha256 }}"
         sha512: "{{ .rockchip_rk3588_ddr_sha512 }}"

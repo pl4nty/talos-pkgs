@@ -1,0 +1,134 @@
+From patchwork Sun Jul  2 11:01:02 2023
+Content-Type: text/plain; charset="utf-8"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+X-Patchwork-Submitter: Jonas Karlman <jonas@kwiboo.se>
+X-Patchwork-Id: 1802303
+X-Patchwork-Delegate: ykai007@gmail.com
+Return-Path: <u-boot-bounces@lists.denx.de>
+X-Original-To: incoming@patchwork.ozlabs.org
+Delivered-To: patchwork-incoming@legolas.ozlabs.org
+Authentication-Results: legolas.ozlabs.org;
+ spf=pass (sender SPF authorized) smtp.mailfrom=lists.denx.de
+ (client-ip=85.214.62.61; helo=phobos.denx.de;
+ envelope-from=u-boot-bounces@lists.denx.de; receiver=<UNKNOWN>)
+Authentication-Results: legolas.ozlabs.org;
+	dkim=pass (2048-bit key;
+ unprotected) header.d=kwiboo.se header.i=@kwiboo.se header.a=rsa-sha256
+ header.s=s1 header.b=XLdg8/kd;
+	dkim-atps=neutral
+Received: from phobos.denx.de (phobos.denx.de [85.214.62.61])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature ECDSA (P-384) server-digest SHA384)
+	(No client certificate requested)
+	by legolas.ozlabs.org (Postfix) with ESMTPS id 4Qv5hT6Pbzz20ZF
+	for <incoming@patchwork.ozlabs.org>; Sun,  2 Jul 2023 21:01:13 +1000 (AEST)
+Received: from h2850616.stratoserver.net (localhost [IPv6:::1])
+	by phobos.denx.de (Postfix) with ESMTP id 77FB2861D5;
+	Sun,  2 Jul 2023 13:01:08 +0200 (CEST)
+Authentication-Results: phobos.denx.de;
+ dmarc=pass (p=none dis=none) header.from=kwiboo.se
+Authentication-Results: phobos.denx.de;
+ spf=pass smtp.mailfrom=u-boot-bounces@lists.denx.de
+Authentication-Results: phobos.denx.de;
+	dkim=pass (2048-bit key;
+ unprotected) header.d=kwiboo.se header.i=@kwiboo.se header.b="XLdg8/kd";
+	dkim-atps=neutral
+Received: by phobos.denx.de (Postfix, from userid 109)
+ id 35FA8861E4; Sun,  2 Jul 2023 13:01:07 +0200 (CEST)
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on phobos.denx.de
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=BAYES_00,DKIM_SIGNED,
+ DKIM_VALID,DKIM_VALID_AU,DKIM_VALID_EF,RCVD_IN_BL_SPAMCOP_NET,
+ RCVD_IN_MSPIKE_H4,RCVD_IN_MSPIKE_WL,SPF_HELO_NONE,SPF_PASS,
+ T_SCC_BODY_TEXT_LINE,UNPARSEABLE_RELAY autolearn=no autolearn_force=no
+ version=3.4.2
+Received: from s.wrqvtzvf.outbound-mail.sendgrid.net
+ (s.wrqvtzvf.outbound-mail.sendgrid.net [149.72.126.143])
+ (using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits))
+ (No client certificate requested)
+ by phobos.denx.de (Postfix) with ESMTPS id D48C68613D
+ for <u-boot@lists.denx.de>; Sun,  2 Jul 2023 13:01:04 +0200 (CEST)
+Authentication-Results: phobos.denx.de;
+ dmarc=pass (p=none dis=none) header.from=kwiboo.se
+Authentication-Results: phobos.denx.de; spf=pass
+ smtp.mailfrom=bounces+31435339-7456-u-boot=lists.denx.de@em2124.kwiboo.se
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kwiboo.se;
+ h=from:subject:mime-version:to:cc:content-transfer-encoding:
+ content-type:cc:content-type:from:subject:to;
+ s=s1; bh=IEYHRp0+L8TAeiqDe543lR0pTH+AuXr1s0YXo8/wiqI=;
+ b=XLdg8/kdgWG4aCfddfhcJkk7maTPtfJFnzatAvXUQWOo+aWKqaCcxO5d/VAq8wd8DDS9
+ 76SgpzN2516U9CXpcmIyOtLrsKz0gjceaGBpK1mFbu9rVQu2asAGYPptAxl/rJfwD4RVO8
+ TkrgeYPmO+9ViVw0H8v0n8sHuqkYDNZ84q40x8s7qRDMo2Svlbq5DJ58Q11zO94/rCrs5b
+ UadUCThk5oNgoMfPGy8xTj07NILglejDb/ADfnx/7eefqKpF7DsUSgvS1FaizRSakQR91N
+ XnJDRptm1xboF8SgWyFYUvS6PNdrowAbod2844GOE0sE4eL5fuztiHnjPhckTtGQ==
+Received: by filterdrecv-66949dbc98-gwbzx with SMTP id
+ filterdrecv-66949dbc98-gwbzx-1-64A158EE-41
+ 2023-07-02 11:01:02.393903314 +0000 UTC m=+4533674.176720178
+Received: from bionic.localdomain (unknown) by geopod-ismtpd-6 (SG) with ESMTP
+ id bYjxoAh5TV2_XtzfIMMpEA Sun, 02 Jul 2023 11:01:01.816 +0000 (UTC)
+From: Jonas Karlman <jonas@kwiboo.se>
+Subject: [RFC] rockchip: spl: Enable caches to speed up checksum validation
+Date: Sun, 02 Jul 2023 11:01:02 +0000 (UTC)
+Message-ID: <20230702110055.3686457-1-jonas@kwiboo.se>
+X-Mailer: git-send-email 2.41.0
+MIME-Version: 1.0
+X-SG-EID: 
+ TdbjyGynYnRZWhH+7lKUQJL+ZxmxpowvO2O9SQF5CwCVrYgcwUXgU5DKUU3QxAfZekEeQsTe+RrMu3cja6a0h24RQWwtLiM8yLLahEepgIaOFD1S6zduB9a/FXKlIJPJea9WC9L8/nGY30WiOXnFgwSb5B9aFI2qwfuDAnZMYUIjyPwwtsBgA9i6apzKpf8L5Md7QfArTk9Y5wtWgER9bKCj/CC+bEHADF5qRYawA8cSKjVNaF/ZuMdDQghZZ0hc
+To: Kever Yang <kever.yang@rock-chips.com>, Simon Glass <sjg@chromium.org>,
+ Philipp Tomsich <philipp.tomsich@vrull.eu>
+Cc: u-boot@lists.denx.de, Jonas Karlman <jonas@kwiboo.se>
+X-Entity-ID: P7KYpSJvGCELWjBME/J5tg==
+X-BeenThere: u-boot@lists.denx.de
+X-Mailman-Version: 2.1.39
+Precedence: list
+List-Id: U-Boot discussion <u-boot.lists.denx.de>
+List-Unsubscribe: <https://lists.denx.de/options/u-boot>,
+ <mailto:u-boot-request@lists.denx.de?subject=unsubscribe>
+List-Archive: <https://lists.denx.de/pipermail/u-boot/>
+List-Post: <mailto:u-boot@lists.denx.de>
+List-Help: <mailto:u-boot-request@lists.denx.de?subject=help>
+List-Subscribe: <https://lists.denx.de/listinfo/u-boot>,
+ <mailto:u-boot-request@lists.denx.de?subject=subscribe>
+Errors-To: u-boot-bounces@lists.denx.de
+Sender: "U-Boot" <u-boot-bounces@lists.denx.de>
+X-Virus-Scanned: clamav-milter 0.103.8 at phobos.denx.de
+X-Virus-Status: Clean
+
+FIT checksum validation is very slow in SPL due to D-cache not being
+enabled.
+
+Enable caches in SPL to speed up FIT checksum validation, from seconds
+to milliseconds.
+
+Signed-off-by: Jonas Karlman <jonas@kwiboo.se>
+---
+I am not sure if it is even a good idea to enable caches in SPL, if this
+is the best way to enable caches and maybe this should be behind a
+Kconfig option?
+
+Have only been able to runtime test this on RK3328, RK3399 and RK3568.
+
+Any advice on this would be grateful.
+
+Regards,
+Jonas
+
+ arch/arm/mach-rockchip/spl.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/arch/arm/mach-rockchip/spl.c b/arch/arm/mach-rockchip/spl.c
+index 30be64042521..29fe3353105b 100644
+--- a/arch/arm/mach-rockchip/spl.c
++++ b/arch/arm/mach-rockchip/spl.c
+@@ -149,6 +149,10 @@ void board_init_f(ulong dummy)
+ 	}
+ 	gd->ram_top = gd->ram_base + get_effective_memsize();
+ 	gd->ram_top = board_get_usable_ram_top(gd->ram_size);
++	gd->relocaddr = gd->ram_top;
++
++	arch_reserve_mmu();
++	enable_caches();
+ #endif
+ 	preloader_console_init();
+ }

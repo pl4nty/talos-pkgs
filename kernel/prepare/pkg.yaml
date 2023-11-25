@@ -16,8 +16,17 @@ steps:
         tar -xzf linux.tar.gz --strip-components=1
         rm linux.tar.gz
 
-        patch -p1 < /pkg/turing_rk1/0001-arm64-dts-turing-rk1-add-clkreqn-pinctrl-to-pcie3x4-.patch
-        patch -p1 < /pkg/turing_rk1/0002-arm64-dts-rockchip-turing-rk1-pull-down-emmc_data_st.patch
+        # https://patchwork.kernel.org/project/linux-arm-kernel/list/?series=792374
+        # patch -p1 < /pkg/turing_rk1/Add-initial-devicetree-for-Turing-RK1.patch
+
+        # https://patchwork.kernel.org/project/linux-arm-kernel/list/?series=800767
+        patch -p1 < /pkg/turing_rk1/PCI-brcmstb-Configure-appropriate-HW-CLKREQ-mode.patch
+
+        # https://patchwork.kernel.org/project/linux-arm-kernel/list/?series=803010
+        patch -p1 < /pkg/turing_rk1/arm64-dts-rockchip-Add-PCIe-pinctrls-to-Turing-RK1.patch
+        
+        # https://patchwork.kernel.org/project/linux-arm-kernel/list/?series=803011
+        patch -p1 < /pkg/turing_rk1/arm64-dts-rockchip-Fix-eMMC-Data-Strobe-PD.patch
 
         mkdir /bin
         ln -sv /toolchain/bin/bash /bin/bash

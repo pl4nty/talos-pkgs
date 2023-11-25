@@ -122,14 +122,12 @@ steps:
         tar -xjf u-boot.tar.bz2 --strip-components=1 -C ${ROCK_PI_4_RK3399_U_BOOT}
         cd ${ROCK_PI_4_RK3399_U_BOOT}
         make rock-pi-4-rk3399_defconfig
-        sed -i "s/CONFIG_TOOLS_LIBCRYPTO=y/# CONFIG_TOOLS_LIBCRYPTO is not set/" .config
       # rock-pi-4c-rk3399
       - |
         mkdir ${ROCK_PI_4C_RK3399_U_BOOT}
         tar -xjf u-boot.tar.bz2 --strip-components=1 -C ${ROCK_PI_4C_RK3399_U_BOOT}
         cd ${ROCK_PI_4C_RK3399_U_BOOT}
         make rock-pi-4c-rk3399_defconfig
-        sed -i "s/CONFIG_TOOLS_LIBCRYPTO=y/# CONFIG_TOOLS_LIBCRYPTO is not set/" .config
       # jetson nano
       - |
         mkdir ${JETSON_NANO_U_BOOT}
@@ -152,6 +150,8 @@ steps:
         cd ${TURING_RK1_U_BOOT}
         # https://patchwork.ozlabs.org/project/uboot/list/?series=362000
         patch -p1 < /pkg/turing_rk1/RFC-rockchip-spl-Enable-caches-to-speed-up-checksum-validation.patch
+        # not upstreamed yet
+        patch -p1 < /pkg/turing_rk1/0002-board-rockchip-add-Turing-RK1-RK3588.patch
         make turing-rk1-rk3588_defconfig
     build:
       # sun50i_a64

@@ -38,7 +38,7 @@ steps:
         make -j $(nproc) modules_install DEPMOD=/toolchain/bin/depmod INSTALL_MOD_PATH=/rootfs INSTALL_MOD_STRIP=1
         depmod -b /rootfs $KERNELRELEASE
         unlink /rootfs/lib/modules/$KERNELRELEASE/build
-      # this doesn't exist on rc kernel?
+      # doesn't exist in >6.1 kernel
       # unlink /rootfs/lib/modules/$KERNELRELEASE/source
 finalize:
   - from: /rootfs

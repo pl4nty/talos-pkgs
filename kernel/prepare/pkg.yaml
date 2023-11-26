@@ -15,6 +15,8 @@ steps:
       - |
         tar -xzf linux.tar.gz --strip-components=1
         rm linux.tar.gz
+        
+        git apply /pkg/turing_rk1/0003-arm-dts-rockchip-rk3588-turing-rk1-pull-down-emmc_da.patch
 
         # https://patchwork.kernel.org/project/linux-arm-kernel/list/?series=792374
         # patch -p1 < /pkg/turing_rk1/Add-initial-devicetree-for-Turing-RK1.patch

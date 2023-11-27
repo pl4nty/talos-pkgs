@@ -5,7 +5,7 @@ dependencies:
   - image: '{{ .TOOLS_IMAGE }}'
 steps:
   - sources:
-      - url: https://git.kernel.org/torvalds/t/linux-{{ .linux_version }}.tar.gz
+      - url: https://github.com/Joshua-Riek/linux/archive/{{ .linux_version }}.tar.gz
         destination: linux.tar.gz
         sha256: "{{ .linux_sha256 }}"
         sha512: "{{ .linux_sha512 }}"
@@ -15,20 +15,6 @@ steps:
       - |
         tar -xzf linux.tar.gz --strip-components=1
         rm linux.tar.gz
-        
-        git apply /pkg/turing_rk1/0003-arm-dts-rockchip-rk3588-turing-rk1-pull-down-emmc_da.patch
-
-        # https://patchwork.kernel.org/project/linux-arm-kernel/list/?series=792374
-        # patch -p1 < /pkg/turing_rk1/Add-initial-devicetree-for-Turing-RK1.patch
-
-        # https://patchwork.kernel.org/project/linux-arm-kernel/list/?series=800767
-        patch -p1 < /pkg/turing_rk1/PCI-brcmstb-Configure-appropriate-HW-CLKREQ-mode.patch
-
-        # https://patchwork.kernel.org/project/linux-arm-kernel/list/?series=803010
-        patch -p1 < /pkg/turing_rk1/arm64-dts-rockchip-Add-PCIe-pinctrls-to-Turing-RK1.patch
-        
-        # https://patchwork.kernel.org/project/linux-arm-kernel/list/?series=803011
-        patch -p1 < /pkg/turing_rk1/arm64-dts-rockchip-Fix-eMMC-Data-Strobe-PD.patch
 
         mkdir /bin
         ln -sv /toolchain/bin/bash /bin/bash

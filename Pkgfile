@@ -181,9 +181,9 @@ vars:
   arm_trusted_firmware_rk3588_sha512: 50bdf94e5eab78bec5584f0f08d64713284bc09d133340eac26ed25c8ca4dbea8509c8e788c9a23070451bece982c1ac16f5bd164e7df90bdb82a4f17b792e95
 
   # renovate: datasource=github-tags extractVersion=^v(?<version>.*)$ depName=u-boot/u-boot
-  uboot_version: 2024.01-rc3
-  uboot_sha256: 0269372d0dade58a24dac1d82be43f592cc8262ead5a9a9a22c06ea5a7f981ea
-  uboot_sha512: 51a45e6a0008ef04570b6357518c85fd22604be0090ad5bf1dc7c821eb34ea33441314c49128dd0bd3084406b7138497044bb47f7e57d38a680768fb9f2f6577
+  uboot_version: 2024.01-rc1
+  uboot_sha256: c2adf08e91c4bc3f6b7070029c4c6aefd9b04ea77d5260c6844d2a7e8cc49ae2
+  uboot_sha512: 3bd559dcad2396693a76c67ac55b957b4ff3573d38cbe84e09ba1c0944b5a44ebf08bf51b23fb9caefe40b7430095db756603d8828502a30dd6970f909bc0e3e
 
   # renovate: datasource=git-tags extractVersion=^v(?<version>.*)$ depName=git://git.kernel.org/pub/scm/utils/util-linux/util-linux.git
   util_linux_version: 2.39.2

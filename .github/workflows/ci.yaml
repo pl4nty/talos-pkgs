@@ -5,8 +5,7 @@
 env:
   USERNAME: ${{ github.repository_owner }}
   PLATFORM: linux/arm64
-  TARGETS: ""
-  NONFREE_TARGETS: ""
+  TARGETS: kernel u-boot
 
 name: default
 concurrency:

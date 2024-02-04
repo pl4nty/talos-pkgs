@@ -68,9 +68,9 @@ vars:
   ipxe_sha512: 00dc6f925e3b3f6a92b7b6fc1733a3c022b3af7c11b1c0dd8a36fb383a912fc3f7861fcafbaf385ef8f2bc41da147252ac329faf9c88bdc67d770446fc9bae99
 
   # renovate: datasource=git-tags extractVersion=^v(?<version>.*)$ depName=git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git
-  linux_version: 6.1.64
-  linux_sha256: 629daa38f3ea67f29610bfbd53f9f38f46834d3654451e9474100490c66dc7e7
-  linux_sha512: 84ea64fab869ce3929b90862094d9ca762c3c1cec1ae8c3f7191d33efc4f1ad5ab4f89d2b69b142d5893f17475099e7e4b7f124edf7c0eee2638fa6202fb3d6d
+  linux_version: 6.8-rc2
+  linux_sha256: 2e236462c81325bcbd31cb71c4b58a521b07d6136719124d0e3caff85c2c5d75
+  linux_sha512: 499fc4ff7bed8c1290fceb96b2051d2c2c4047313a4d0572e3430cb960460d61114db0300719a888c16b28ddbeafeb3c100ef15da7f9de195ef81bc4b439bb68
 
   # renovate: datasource=git-tags extractVersion=^v(?<version>.*)$ depName=git://git.kernel.org/pub/scm/utils/kernel/kmod/kmod.git
   kmod_version: 31
@@ -168,14 +168,18 @@ vars:
   systemd_sha512: 3bbc431a292ab590b70d3b490a528f71d30ccf478ddfa66d1c210f40c260ef49ac30651c19f2d073acf38d68398a4a6fbf95391f0e3ea0333d94b9d4e81d514f
 
   # renovate: datasource=github-tags depName=ARM-software/arm-trusted-firmware
-  arm_trusted_firmware_version: v2.8.0
-  arm_trusted_firmware_sha256: 60fad60eeb6840097f8e64f16093c06ddb2ef269c7a22affed02beaa6cefe466
-  arm_trusted_firmware_sha512: 958cf8f9e258638e59d0fbd8b053fce7d8a9ea2fc922686c9d20ea16f79f55219ac18a12ab240c528ee98e49c2e0eef4c963fdb255cc14b92437a5b3cffc8640
+  arm_trusted_firmware_version: v2.10.0
+  arm_trusted_firmware_sha256: 696b8e53923aac4474532da7dd681f0bd044b329732facd65aeabea3e61adca9
+  arm_trusted_firmware_sha512: c997fa2af63282a77ba833ea08a4035a8465494d6130b0d4f255ddf95dc553f862493ba8c462aeca7b1bccf945afbe6500b836438d56a1a549554594ccdaa7f2
+
+  rockchip_rkbin_version: master
+  rockchip_rkbin_sha256: 44094f86bd1a12b3f68d79ffe39adfac7708e71b83d4d36429134f1bd9691835
+  rockchip_rkbin_sha512: 6460c25f12246759bdea795232d5fe8ce879d8267d5d31288e80c1b84e8bdc81ccf19b64401918a345fd53fb6c56a1fa2041986cc26d20fdcf0457483338d6ae
 
   # renovate: datasource=github-tags extractVersion=^v(?<version>.*)$ depName=u-boot/u-boot
-  uboot_version: 2023.01
-  uboot_sha256: 69423bad380f89a0916636e89e6dcbd2e4512d584308d922d1039d1e4331950f
-  uboot_sha512: 417a28267eb7875820d08fafc7316f164663609378637539e71648b0b9b7d28796b6c381717f31b0ab6472805fefd32628ef7d1b2e7b9f3c51c8ad122993f679
+  uboot_version: 2024.04-rc1
+  uboot_sha256: 297342833e21b5c0bb1be70ac6ff7294084cb11d4d07af9b6a9d33b5b73fcd3a
+  uboot_sha512: fc3bcd932448af06805bb1fbb73fc256a1d01f5800a7799c19e5db31d93f3a5dc01562655388f7f8323fa2d410fbfd54a0380ccb509d2991e5cd817a754fda32
 
   # renovate: datasource=git-tags extractVersion=^v(?<version>.*)$ depName=git://git.kernel.org/pub/scm/utils/util-linux/util-linux.git
   util_linux_version: 2.39.2
@@ -193,4 +197,9 @@ vars:
   zfs_sha256: 06b24cbb3cbc1554e2edf2fcd71d1f8bec4febf4412aeac17070877c44302abd
   zfs_sha512: d06fce8faa22b0cab2c69befa3842476703433fa90530d1fdf168716afd2039e97b124aa8ef581bed3bc19604fa2faa0bc1e29f6d028e3ef0085f0e34e05230a
 labels:
-  org.opencontainers.image.source: https://github.com/siderolabs/pkgs
+  org.opencontainers.image.source: https://github.com/si0ls/talos-orangepi5
+  org.opencontainers.image.url: https://github.com/si0ls/talos-orangepi5
+  org.opencontainers.image.documentation: https://github.com/si0ls/talos-orangepi5/blob/main/README.md
+  org.opencontainers.image.description: Talos Linux Orange Pi 5 build
+  org.opencontainers.image.authors: Louis S. <louis@schne.id>
+  org.opencontainers.image.version: v1.7.0-beta

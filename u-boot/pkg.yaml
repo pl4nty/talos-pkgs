@@ -19,7 +19,7 @@ dependencies:
 steps:
   # {{ if eq .ARCH "aarch64" }} This in fact is YAML comment, but Go templating instruction is evaluated by bldr restricting build to arm64 only
   - sources:
-      - url: https://github.com/ARM-software/arm-trusted-firmware/archive/{{ .arm_trusted_firmware_version }}.tar.gz
+      - url: https://github.com/ARM-software/arm-trusted-firmware/archive/lts-{{ .arm_trusted_firmware_version }}.tar.gz
         destination: arm-trusted-firmware.tar.gz
         sha256: "{{ .arm_trusted_firmware_sha256 }}"
         sha512: "{{ .arm_trusted_firmware_sha512 }}"
@@ -27,11 +27,16 @@ steps:
         destination: u-boot.tar.bz2
         sha256: "{{ .uboot_sha256 }}"
         sha512: "{{ .uboot_sha512 }}"
+      - url: https://ftp.denx.de/pub/u-boot/u-boot-{{ .uboot_tegra_version }}.tar.bz2
+        destination: u-boot-tegra.tar.bz2
+        sha256: "{{ .uboot_tegra_sha256 }}"
+        sha512: "{{ .uboot_tegra_sha512 }}"
     env:
       SOURCE_DATE_EPOCH: {{ .BUILD_ARG_SOURCE_DATE_EPOCH }}
       SUN50I_A64_ARM_TRUSTED_FIRMWARE: sun50i_a64_arm-trusted-firmware
       RK3328_ARM_TRUSTED_FIRMWARE: rk3328_arm-trusted-firmware
       RK3399_ARM_TRUSTED_FIRMWARE: rk3399_arm-trusted-firmware
+      RK3588_ARM_TRUSTED_FIRMWARE: rk3588_arm-trusted-firmware
       LIBRETECH_ALL_H3_CC_H5_U_BOOT: libretech_all_h3_cc_h5_u-boot
       ROCK64_RK3328_U_BOOT: rock64_rk3328_u-boot
       RPI_ARM64_GENERIC_U_BOOT: rpi_generic_u-boot
@@ -41,10 +46,13 @@ steps:
       ROCK_PI_4C_RK3399_U_BOOT: rock-pi-4c-rk3399_u-boot
       JETSON_NANO_U_BOOT: jetson-nano_u-boot
       NANOPI_R4S_U_BOOT: nanopi-r4s_u-boot
+      TURING_RK1_RK3588_U_BOOT: turing-rk1-rk3588_u-boot
     prepare:
       - |
-        mkdir -p /usr/bin \
-          && ln -sf /toolchain/bin/env /usr/bin/env \
+        mkdir -p /usr/bin
+        ln -sf /toolchain/bin/env /usr/bin/env
+        ln -sf /toolchain/bin/python3 /toolchain/bin/python
+        pip3 install pyelftools
       # sun50i_a64
       - |
         mkdir ${SUN50I_A64_ARM_TRUSTED_FIRMWARE}
@@ -59,6 +67,15 @@ steps:
         tar -xzf arm-trusted-firmware.tar.gz --strip-components=1 -C ${RK3399_ARM_TRUSTED_FIRMWARE}
         cd ${RK3399_ARM_TRUSTED_FIRMWARE}
         patch -p0 < /pkg/rockpi4/patches/platform.mk.patch
+      # rk3588
+      - |
+        mkdir ${RK3588_ARM_TRUSTED_FIRMWARE}
+        tar -xzf arm-trusted-firmware.tar.gz --strip-components=1 -C ${RK3588_ARM_TRUSTED_FIRMWARE}
+        cd ${RK3588_ARM_TRUSTED_FIRMWARE}
+        # https://review.trustedfirmware.org/c/TF-A/trusted-firmware-a/+/21840/6 and related chain
+        for patch in $(find /pkg/turing_rk1/arm-trusted-firmware-patches -type f -name "*.patch" | sort); do
+          patch -p1 < $patch || (echo "Failed to apply patch $patch" && exit 1)
+        done
       # libretech_all_h3_cc_h5
       - |
         mkdir ${LIBRETECH_ALL_H3_CC_H5_U_BOOT}
@@ -78,7 +95,6 @@ steps:
         mkdir ${RPI_ARM64_GENERIC_U_BOOT}
         tar -xjf u-boot.tar.bz2 --strip-components=1 -C ${RPI_ARM64_GENERIC_U_BOOT}
         cd ${RPI_ARM64_GENERIC_U_BOOT}
-        patch -p1 < /pkg/rpi_arm64/0002-rpi-add-NVMe-to-boot-order.patch
         patch -p1 < /pkg/rpi_arm64/0003-Revert-nvme-Correct-the-prps-per-page-calculation-me.patch
         patch -p1 < /pkg/rpi_arm64/0004-usb-xhci-brcm-Make-driver-compatible-with-downstream.patch
         patch -p1 < /pkg/rpi_arm64/0005-nvme-improve-readability-of-nvme_setup_prps.patch
@@ -107,24 +123,18 @@ steps:
         tar -xjf u-boot.tar.bz2 --strip-components=1 -C ${ROCK_PI_4_RK3399_U_BOOT}
         cd ${ROCK_PI_4_RK3399_U_BOOT}
         patch -p0 < /pkg/rockpi4/patches/board-rock-pi-4-enable-spi-flash.patch
-        patch -p0 < /pkg/rockpi4/patches/general-add-xtx-spi-nor-chips.patch
-        patch -p0 < /pkg/rockpi4/patches/enable-boot-from-spi-flash.patch
         make rock-pi-4-rk3399_defconfig
-        sed -i "s/CONFIG_TOOLS_LIBCRYPTO=y/# CONFIG_TOOLS_LIBCRYPTO is not set/" .config
       # rock-pi-4c-rk3399
       - |
         mkdir ${ROCK_PI_4C_RK3399_U_BOOT}
         tar -xjf u-boot.tar.bz2 --strip-components=1 -C ${ROCK_PI_4C_RK3399_U_BOOT}
         cd ${ROCK_PI_4C_RK3399_U_BOOT}
         patch -p0 < /pkg/rockpi4/patches/board-rock-pi-4-enable-spi-flash.patch
-        patch -p0 < /pkg/rockpi4/patches/general-add-xtx-spi-nor-chips.patch
-        patch -p0 < /pkg/rockpi4/patches/enable-boot-from-spi-flash.patch
         make rock-pi-4c-rk3399_defconfig
-        sed -i "s/CONFIG_TOOLS_LIBCRYPTO=y/# CONFIG_TOOLS_LIBCRYPTO is not set/" .config
       # jetson nano
       - |
         mkdir ${JETSON_NANO_U_BOOT}
-        tar -xjf u-boot.tar.bz2 --strip-components=1 -C ${JETSON_NANO_U_BOOT}
+        tar -xjf u-boot-tegra.tar.bz2 --strip-components=1 -C ${JETSON_NANO_U_BOOT}
         cd ${JETSON_NANO_U_BOOT}
         patch -p0 < /pkg/jetson_nano/patches/tegra.patch
         make p3450-0000_defconfig
@@ -136,6 +146,16 @@ steps:
         cd ${NANOPI_R4S_U_BOOT}
         make nanopi-r4s-rk3399_defconfig
         sed -i "s/CONFIG_TOOLS_LIBCRYPTO=y/# CONFIG_TOOLS_LIBCRYPTO is not set/" .config
+      # turing_rk1-rk3588
+      - |
+        mkdir ${TURING_RK1_RK3588_U_BOOT}
+        tar -xjf u-boot.tar.bz2 --strip-components=1 -C ${TURING_RK1_RK3588_U_BOOT}
+        cd ${TURING_RK1_RK3588_U_BOOT}
+        # not upstreamed yet
+        for patch in $(find /pkg/turing_rk1/patches -type f -name "*.patch" | sort); do
+          patch -p1 < $patch || (echo "Failed to apply patch $patch" && exit 1)
+        done
+        make turing-rk1-rk3588_defconfig
     build:
       # sun50i_a64
       - |
@@ -163,6 +183,13 @@ steps:
         # https://salsa.debian.org/debian/arm-trusted-firmware/-/commit/6ed8f61df3b07bb22a68a0fc189ec3b3f7b00dbd
         # https://developer.trustedfirmware.org/T996
         TF_LDFLAGS=--no-warn-rwx-segments CFLAGS=--param=min-pagesize=0 make -j $(nproc) PLAT=rk3399 DEBUG=0 bl31
+      # rk3588
+      - |
+        cd ${RK3588_ARM_TRUSTED_FIRMWARE}
+        make realclean
+        TF_LDFLAGS=--no-warn-rwx-segments CFLAGS=--param=min-pagesize=0 make -j $(nproc) PLAT=rk3588 DEBUG=0 bl31
+        mkdir -p ${RK3588_ARM_TRUSTED_FIRMWARE}/build/rk3588/release/
+        cp -f /pkg/turing_rk1/rkbin/*.bin build/rk3588/release/
       # libretech_all_h3_cc_h5
       - |
         export BL31=$(pwd)/${SUN50I_A64_ARM_TRUSTED_FIRMWARE}/build/sun50i_a64/release/bl31.bin
@@ -223,6 +250,12 @@ steps:
         export BL31=$(pwd)/${RK3399_ARM_TRUSTED_FIRMWARE}/build/rk3399/release/bl31/bl31.elf
         cd ${NANOPI_R4S_U_BOOT}
         make -j $(nproc) HOSTLDLIBS_mkimage="-lssl -lcrypto"
+      # turing_rk1-rk3588
+      - |
+        export BL31=$(pwd)/${RK3588_ARM_TRUSTED_FIRMWARE}/build/rk3588/release/bl31/bl31.elf
+        export ROCKCHIP_TPL=$(pwd)/${RK3588_ARM_TRUSTED_FIRMWARE}/build/rk3588/release/rk3588_ddr_lp4_2112MHz_lp5_2736MHz_v1.12_patched.bin
+        cd ${TURING_RK1_RK3588_U_BOOT}
+        make -j $(nproc) HOSTLDLIBS_mkimage="-lssl -lcrypto"
     install:
       # libretech_all_h3_cc_h5
       - |
@@ -266,6 +299,13 @@ steps:
       - |
         mkdir -p /rootfs/nanopi_r4s
         cp -v ${NANOPI_R4S_U_BOOT}/u-boot-rockchip.bin /rootfs/nanopi_r4s
+      # turing-rk1-rk3588
+      - |
+        mkdir -p /rootfs/turing_rk1
+        cp -v ${TURING_RK1_RK3588_U_BOOT}/u-boot-rockchip.bin /rootfs/turing_rk1
+
+        # cp spi image
+        cp -v ${TURING_RK1_RK3588_U_BOOT}/u-boot-rockchip-spi.bin /rootfs/turing_rk1
   # {{ else }}
   - install:
       - |

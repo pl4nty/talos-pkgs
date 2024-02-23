@@ -168,14 +168,18 @@ vars:
   systemd_sha512: 3bbc431a292ab590b70d3b490a528f71d30ccf478ddfa66d1c210f40c260ef49ac30651c19f2d073acf38d68398a4a6fbf95391f0e3ea0333d94b9d4e81d514f
 
   # renovate: datasource=github-tags depName=ARM-software/arm-trusted-firmware
-  arm_trusted_firmware_version: v2.8.0
-  arm_trusted_firmware_sha256: 60fad60eeb6840097f8e64f16093c06ddb2ef269c7a22affed02beaa6cefe466
-  arm_trusted_firmware_sha512: 958cf8f9e258638e59d0fbd8b053fce7d8a9ea2fc922686c9d20ea16f79f55219ac18a12ab240c528ee98e49c2e0eef4c963fdb255cc14b92437a5b3cffc8640
+  arm_trusted_firmware_version: v2.10.2
+  arm_trusted_firmware_sha256: e9ecb741a685c90b70ea7221a4811883e964495ba642cd45e908f2f7843b362a
+  arm_trusted_firmware_sha512: 43e4628a5674622334669b99593fb20dcc520523e957ce97e339f81d22f014af4c31ec9157679c9641d09acd15e56da212cef10221c25f7bc9c3dbd3888ace01
 
   # renovate: datasource=github-tags extractVersion=^v(?<version>.*)$ depName=u-boot/u-boot
-  uboot_version: 2023.01
-  uboot_sha256: 69423bad380f89a0916636e89e6dcbd2e4512d584308d922d1039d1e4331950f
-  uboot_sha512: 417a28267eb7875820d08fafc7316f164663609378637539e71648b0b9b7d28796b6c381717f31b0ab6472805fefd32628ef7d1b2e7b9f3c51c8ad122993f679
+  uboot_version: 2024.01
+  uboot_sha256: b99611f1ed237bf3541bdc8434b68c96a6e05967061f992443cb30aabebef5b3
+  uboot_sha512: 45bd093ba3bda23e43cdde83d8656c1ee1348ac2886ecff1fee475f101ac4965a5be6565408fa5b990c723f3fdc833edfca60a719f735a43040cd14a1b59a88b
+
+  uboot_tegra_version: 2023.01
+  uboot_tegra_sha256: 69423bad380f89a0916636e89e6dcbd2e4512d584308d922d1039d1e4331950f
+  uboot_tegra_sha512: 417a28267eb7875820d08fafc7316f164663609378637539e71648b0b9b7d28796b6c381717f31b0ab6472805fefd32628ef7d1b2e7b9f3c51c8ad122993f679
 
   # renovate: datasource=git-tags extractVersion=^v(?<version>.*)$ depName=git://git.kernel.org/pub/scm/utils/util-linux/util-linux.git
   util_linux_version: 2.39.2

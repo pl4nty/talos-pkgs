@@ -2,10 +2,10 @@ diff --git a/configs/rpi_arm64_defconfig b/configs/rpi_arm64_defconfig
 index 031ed69ff0..f41d367238 100644
 --- a/configs/rpi_arm64_defconfig
 +++ b/configs/rpi_arm64_defconfig
-@@ -57,3 +57,19 @@ CONFIG_VIDEO_BCM2835=y
+@@ -57,3 +57,19 @@
+ CONFIG_VIDEO_BCM2835=y
  CONFIG_CONSOLE_SCROLL_LINES=10
  CONFIG_PHYS_TO_BUS=y
- CONFIG_OF_LIBFDT_OVERLAY=y
 +# Enable NVME
 +CONFIG_NVME_PCI=y
 +CONFIG_CMD_NVME=y

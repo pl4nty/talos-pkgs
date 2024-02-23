@@ -2,6 +2,12 @@
 #
 # Generated on 2024-03-27T11:04:35Z by kres latest.
 
+env:
+  USERNAME: ${{ github.repository_owner }}
+  PLATFORM: linux/arm64
+  TARGETS: ""
+  NONFREE_TARGETS: ""
+
 name: default
 concurrency:
   group: ${{ github.head_ref || github.run_id }}
@@ -25,9 +31,9 @@ jobs:
       issues: read
       packages: write
       pull-requests: read
+      id-token: write
     runs-on:
-      - self-hosted
-      - pkgs
+      - ubuntu-latest
     if: (!startsWith(github.head_ref, 'renovate/') && !startsWith(github.head_ref, 'dependabot/'))
     outputs:
       labels: ${{ steps.retrieve-pr-labels.outputs.result }}
@@ -46,6 +52,8 @@ jobs:
       - name: Unshallow
         run: |
           git fetch --prune --unshallow
+      - name: Set up Namespace CLI
+        uses: namespacelabs/nscloud-setup@v0
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
         with:
@@ -56,10 +64,10 @@ jobs:
           endpoint: tcp://127.0.0.1:1234
       - name: Build
         run: |
-          make
+          make TARGETS="${{ env.TARGETS }}"
       - name: Build nonfree
         run: |
-          make nonfree
+          make nonfree NONFREE_TARGETS="${{ env.NONFREE_TARGETS }}"
       - name: Login to registry
         if: github.event_name != 'pull_request'
         uses: docker/login-action@v3
@@ -70,11 +78,11 @@ jobs:
       - name: Push to registry
         if: github.event_name != 'pull_request'
         run: |
-          make  PUSH=true
+          make PUSH=true TARGETS="${{ env.TARGETS }}"
       - name: Push nonfree
         if: github.event_name != 'pull_request'
         run: |
-          make nonfree PUSH=true
+          make nonfree PUSH=true NONFREE_TARGETS="${{ env.NONFREE_TARGETS }}"
       - name: Retrieve PR labels
         id: retrieve-pr-labels
         uses: actions/github-script@v7

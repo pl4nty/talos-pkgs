@@ -6,18 +6,18 @@ vars:
   TOOLS_IMAGE: ghcr.io/siderolabs/tools:v1.6.0
 
   # renovate: datasource=github-releases depName=containernetworking/plugins
-  cni_version: v1.3.0
+  cni_version: v1.4.0
   cni_sha256: f9871b9f6ccb51d2b264532e96521e44f926928f91434b56ce135c95becf2901
   cni_sha512: 87e186b3cd64f66280f5b2293dcdd1fc22cb8f51a248124fb622adc48a893348419ba4c29c4769dede4d9e60f2e9fea5d4198f10badb4ecd20a1551e0b344e10
 
   # renovate: datasource=github-tags depName=containerd/containerd
-  containerd_version: v1.7.10
-  containerd_ref: 4e1fe7492b9df85914c389d1f15a3ceedbb280ac
+  containerd_version: v1.7.13
+  containerd_ref: 7c3aca7a610df76212171d200ca3811ff6096eb8
   containerd_sha256: dd43e4c1d7b1909a530e044af90697317c64fadbcbdf86fafc607dc723597dbd
   containerd_sha512: b3e9f13ad981b7a9226c23dda3f6bfdc2267c78d549d033d1cab8c4b94c2e6d62025259e80bad23cacbe1a06b39c098d6d4d48414180c85ef61bbb46b9b261d0
 
   # renovate: datasource=git-tags extractVersion=^v(?<version>.*)$ depName=git://git.kernel.org/pub/scm/utils/cryptsetup/cryptsetup.git
-  cryptsetup_version: 2.6.1
+  cryptsetup_version: 2.7.0
   cryptsetup_sha256: da1769da8fa1682f03773e50e75d9d1c4f7464cb660200c00bf5e4586be83308
   cryptsetup_sha512: 91f4570e7398f3aa68d4f029d734731867530f839634a1a8b23b3722b32ecfd41266e2da0404360881557022b092857eed761840f233ce9676348d426b3682a0
 
@@ -27,7 +27,7 @@ vars:
   dosfstools_sha512: 3cc0808edb4432428df8a67da4bb314fd1f27adc4a05754c1a492091741a7b6875ebd9f6a509cc4c5ad85643fc40395b6e0cadee548b25cc439cc9b725980156
 
   # renovate: datasource=github-tags extractVersion=^drbd-(?<version>.*)$ depName=LINBIT/drbd
-  drbd_version: 9.2.6
+  drbd_version: 9.2.7
   drbd_sha256: 25e843e561e0af01a503d91657cea4109cc7e10b422129eeb1d4ba926255a9b4
   drbd_sha512: 53a4b0ddee9b9097c03e15e3a9e48e7898b7bc0226af216eb47d2f081cde26b038d7536197c7ec8e5473643919dede8a928f4f03cc5ad8c1ab625524cb62bc05
 
@@ -63,7 +63,7 @@ vars:
   iptables_sha512: 71e6ed2260859157d61981a4fe5039dc9e8d7da885a626a4b5dae8164c509a9d9f874286b9468bb6a462d6e259d4d32d5967777ecefdd8a293011ae80c00f153
 
   # renovate: datasource=git-refs versioning=git depName=https://github.com/ipxe/ipxe.git
-  ipxe_ref: c3dd3168c916f624af1b843515c1305387060611
+  ipxe_ref: 43e385091a36af34e495ac8c6595bddab55665bb
   ipxe_sha256: 6c975a482e0095be69eb51f2ec4a546d1f7ac046b2208a07bf9c974843f58ed9
   ipxe_sha512: 00dc6f925e3b3f6a92b7b6fc1733a3c022b3af7c11b1c0dd8a36fb383a912fc3f7861fcafbaf385ef8f2bc41da147252ac329faf9c88bdc67d770446fc9bae99
 
@@ -93,7 +93,7 @@ vars:
   libjson_c_sha512: 4cbedd559502bf9014cfcd1d0bb8bb80d2abac4e969d95d4170123cd9cbafb0756b913fdbb83f666d14f674d6539a60ed1c5d0eb03c36b8037a2e00dc1636e19
 
   # renovate: datasource=github-releases depName=tukaani-project/xz
-  xz_version: v5.4.5
+  xz_version: v5.6.0
   xz_sha256: da9dec6c12cf2ecf269c31ab65b5de18e8e52b96f35d5bcd08c12b43e6878803
   xz_sha512: 5cbc3b5bb35a9f5773ad657788fe77013471e3b621c5a8149deb7389d48535926e5bed103456fcfe5ecb044b236b1055b03938a6cc877cfc749372b899fc79e5
 
@@ -103,7 +103,7 @@ vars:
   libpopt_sha512: 5d1b6a15337e4cd5991817c1957f97fc4ed98659870017c08f26f754e34add31d639d55ee77ca31f29bb631c0b53368c1893bd96cf76422d257f7997a11f6466
 
   # renovate: datasource=github-tags extractVersion=^v(?<version>.*)$ depName=seccomp/libseccomp
-  libseccomp_version: 2.5.4
+  libseccomp_version: 2.5.5
   libseccomp_sha256: d82902400405cf0068574ef3dc1fe5f5926207543ba1ae6f8e7a1576351dcbdb
   libseccomp_sha512: 92650bd7d1d48b383f402a536b97a017fd0f6ad1234daf4b938d01c92e8d134a01d2f2dd45fd9e2d025d7556bd1386ec360402145a87f20580c85949d62cea0e
 
@@ -132,12 +132,12 @@ vars:
   musl_sha512: 498ec5d7941194a8806f4d42f0f6d218c862996ef1398b737d0d06995e0b7a6574b240a48088f6b84016b14b2776fe463f829dcb11149cdfc1023d496b235c55
 
   # renovate: datasource=github-releases depName=nvidia/open-gpu-kernel-modules
-  nvidia_driver_version: 535.129.03
+  nvidia_driver_version: 535.161.07
   nvidia_driver_sha256: 170ee91b6cd6c801bba0de91e0d62af8e574adde38120bc762784755b5a9821d
   nvidia_driver_sha512: c8104103f34365b7a20dcebb64e1eb2e64a7b056b44329fa305f81e267759f2b1bb1c09923e617d4f5f4af3be01c3b8e2e6d739f03d4d0f129b31331fec3a4d8
 
   # renovate: datasource=git-tags extractVersion=^openssl-(?<version>.*)$ depName=git://git.openssl.org/openssl.git
-  openssl_version: 3.2.0
+  openssl_version: 3.2.1
   openssl_sha256: 14c826f07c7e433706fb5c69fa9e25dab95684844b4c962a2cf1bf183eb4690e
   openssl_sha512: ba3ac38365fd0c50f1eaf1693b6200a0d66f01ff53c2d3bb0358643cd83fc0c61fc3b84c0658cf74b6ae91d7d8a9da7291697bd9be3063ada8a9df879e58ed52
 
@@ -147,8 +147,8 @@ vars:
   raspberrypi_firmware_sha512: ddc9baeba4e2e442bfe41e427c7ecdd38ee6d44ac4e7c297ae7d5a6c64b0aa1a81206929baeb9aceb74de6f96707b30040e82450ef4f01a78b958299c72e3857
 
   # renovate: datasource=github-tags depName=opencontainers/runc
-  runc_version: v1.1.10
-  runc_ref: 18a0cb0f32bcac2ecc9a10f327d282759c144dab
+  runc_version: v1.1.12
+  runc_ref: 51d5e94601ceffbbd85688df1c928ecccbfa4685
   runc_sha256: bd3e89ae89319ef344e7e26f392b40e344bcd5bbdea84ca459a43189451615bf
   runc_sha512: bf25d5222b560428daab58d887fd867a7e4c5703004eae9dbc1a082d55ac5db961ed8e5a2ff5dafe6d6350e59afd1053b98a6fc0e8a281758b706cf9144860d3
 
@@ -158,7 +158,7 @@ vars:
   socat_sha512: edf459a9f1907a14025e13b3101ad29787f9a72795cffcd00017ce98847562884db29a95b9ae478a6a50868137548b142947c43fb18e975eb5853a763c42902c
 
   # renovate: datasource=git-tags extractVersion=^syslinux-(?<version>.*)$ depName=git://git.kernel.org/pub/scm/boot/syslinux/syslinux.git
-  syslinux_version: 6.03
+  syslinux_version: 6.04-pre1
   syslinux_sha256: 26d3986d2bea109d5dc0e4f8c4822a459276cf021125e8c9f23c3cca5d8c850e
   syslinux_sha512: dd2b2916962b9e93bc1e714182e3ca2a727a229b8afabe913050bcfdd43ee2af51ee3acf79121d8c20caf434583efaa7f3196871e0e07c04d82191323a50fe31
 
@@ -182,7 +182,7 @@ vars:
   uboot_sha512: fc3bcd932448af06805bb1fbb73fc256a1d01f5800a7799c19e5db31d93f3a5dc01562655388f7f8323fa2d410fbfd54a0380ccb509d2991e5cd817a754fda32
 
   # renovate: datasource=git-tags extractVersion=^v(?<version>.*)$ depName=git://git.kernel.org/pub/scm/utils/util-linux/util-linux.git
-  util_linux_version: 2.39.2
+  util_linux_version: 2.40-rc1
   util_linux_sha256: 87abdfaa8e490f8be6dde976f7c80b9b5ff9f301e1b67e3899e1f05a59a1531f
   util_linux_sha512: cebecdd62749d0aeea2c4faf7ad1606426eff03ef3b15cd9c2df1126f216a4ed546d8fc3218c649fa95944eb87a98bb6a7cdd0bea31057c481c5cf608ffc19a3
 
@@ -193,7 +193,7 @@ vars:
   xfsprogs_sha512: 47d035a33367edae7357e34c70bdb0fe9219231153fb4c4f418ed1462d137dd77338c12a199eb71cd70e88903e5fc11e1e4fb595c622183786e87346e2f65739
 
   # renovate: datasource=github-tags extractVersion=^zfs-(?<version>.*)$ depName=openzfs/zfs
-  zfs_version: 2.1.13
+  zfs_version: 2.2.3
   zfs_sha256: 06b24cbb3cbc1554e2edf2fcd71d1f8bec4febf4412aeac17070877c44302abd
   zfs_sha512: d06fce8faa22b0cab2c69befa3842476703433fa90530d1fdf168716afd2039e97b124aa8ef581bed3bc19604fa2faa0bc1e29f6d028e3ef0085f0e34e05230a
 labels:

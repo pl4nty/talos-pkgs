@@ -3,9 +3,10 @@
     "extends": [
         ":dependencyDashboard",
         ":gitSignOff",
-        ":semanticCommitScopeDisabled",
-        "schedule:earlyMondays"
+        ":semanticCommitScopeDisabled"
     ],
+    "forkProcessing": "enabled",
+    "baseBranches": ["$default", "/^release.*/"],
     "prHeader": "Update Request | Renovate Bot",
     "regexManagers": [
         {
@@ -67,7 +68,7 @@
                 "rpm-software-management/popt",
                 "git://git.liburcu.org/userspace-rcu.git"
             ],
-            "versioning": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.?(?<patch>\\d+)?$"
+            "versioning": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.?(?<patch>\\d+)?-?(?<tag>\\w+)?$"
         },
         {
             "matchPackageNames": [

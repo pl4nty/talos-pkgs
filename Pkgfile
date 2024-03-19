@@ -73,7 +73,7 @@ vars:
   linux_sha512: 6ffb13221e64810a5d0aaa073b440ceac58a6aa2d93a3f9c5f92220288f3eb1edba8c5ffe7173b91d66028bdb1b1e2648f3123e5d0d536a116aefa3d65e9fe0b
 
   # renovate: datasource=git-tags extractVersion=^v(?<version>.*)$ depName=git://git.kernel.org/pub/scm/utils/kernel/kmod/kmod.git
-  kmod_version: 31
+  kmod_version: 32
   kmod_sha256: f5a6949043cc72c001b728d8c218609c5a15f3c33d75614b78c79418fcf00d80
   kmod_sha512: 05ca70381808bec5f262b94db625662c385408988178a35e4aaf4960ee0716dc0cbfc327160ea4b61098d0c2130ab1b5142ea8156bea8e06ded7f4d288b6d085
 
@@ -83,7 +83,7 @@ vars:
   libaio_sha512: 65c30a102433bf8386581b03fc706d84bd341be249fbdee11a032b237a7b239e8c27413504fef15e2797b1acd67f752526637005889590ecb380e2e120ab0b71
 
   # renovate: datasource=github-releases extractVersion=^r(?<version>.*)$ depName=benhoyt/inih
-  libinih_version: 57
+  libinih_version: 58
   libinih_sha256: f03f98ca35c3adb56b2358573c8d3eda319ccd5287243d691e724b7eafa970b3
   libinih_sha512: 9f758df876df54ed7e228fd82044f184eefbe47e806cd1e6d62e1b0ea28e2c08e67fa743042d73b4baef0b882480e6afe2e72878b175822eb2bdbb6d89c0e411
 
@@ -132,7 +132,7 @@ vars:
   musl_sha512: 498ec5d7941194a8806f4d42f0f6d218c862996ef1398b737d0d06995e0b7a6574b240a48088f6b84016b14b2776fe463f829dcb11149cdfc1023d496b235c55
 
   # renovate: datasource=github-releases depName=nvidia/open-gpu-kernel-modules
-  nvidia_driver_version: 535.129.03
+  nvidia_driver_version: 550.67
   nvidia_driver_sha256: 170ee91b6cd6c801bba0de91e0d62af8e574adde38120bc762784755b5a9821d
   nvidia_driver_sha512: c8104103f34365b7a20dcebb64e1eb2e64a7b056b44329fa305f81e267759f2b1bb1c09923e617d4f5f4af3be01c3b8e2e6d739f03d4d0f129b31331fec3a4d8
 

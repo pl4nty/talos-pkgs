@@ -5,7 +5,7 @@
 env:
   USERNAME: ${{ github.repository_owner }}
   PLATFORM: linux/arm64
-  TARGETS: ""
+  TARGETS: kernel
   NONFREE_TARGETS: ""
 
 name: default

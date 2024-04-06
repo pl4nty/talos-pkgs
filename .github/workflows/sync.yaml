@@ -31,7 +31,7 @@ jobs:
           # workflow permission is required to commit changes to workflow yaml files
           # it's not supported for github.token yet
           token: ${{ secrets.WORKFLOW_TOKEN }}
-      - uses: octokit/request-action@v2.1.9
+      - uses: octokit/request-action@v2.3.0
         id: upstream
         with:
           token: ${{ github.token }}

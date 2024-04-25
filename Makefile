@@ -59,7 +59,8 @@ TARGETS += flannel-cni
 TARGETS += grub
 TARGETS += ipmitool
 TARGETS += iptables
-TARGETS += ipxe
+# https://github.com/ipxe/ipxe/pull/970
+# TARGETS += ipxe
 TARGETS += kmod
 TARGETS += libaio
 TARGETS += libinih
@@ -81,9 +82,11 @@ TARGETS += xfsprogs
 TARGETS += kernel
 TARGETS += drbd-pkg
 TARGETS += gasket-driver-pkg
-TARGETS += nvidia-open-gpu-kernel-modules-pkg
+# https://github.com/NVIDIA/open-gpu-kernel-modules/pull/152
+# TARGETS += nvidia-open-gpu-kernel-modules-pkg
 TARGETS += zfs-pkg
-NONFREE_TARGETS = nonfree-kmod-nvidia-pkg
+# https://download.nvidia.com/XFree86/
+# NONFREE_TARGETS = nonfree-kmod-nvidia-pkg
 
 # help menu
 
@@ -175,8 +178,7 @@ deps.png:  ## Generates a dependency graph of the Pkgfile.
 	@$(BLDR) graph | dot -Tpng -o deps.png
 
 kernel-olddefconfig:
-	@$(MAKE) local-kernel-build TARGET_ARGS="--build-arg=KERNEL_TARGET=olddefconfig" PLATFORM=linux/amd64 DEST="kernel/build"
-	@$(MAKE) local-kernel-build TARGET_ARGS="--build-arg=KERNEL_TARGET=olddefconfig" PLATFORM=linux/arm64 DEST="kernel/build"
+	@$(MAKE) local-kernel-build TARGET_ARGS="--build-arg=KERNEL_TARGET=olddefconfig" PLATFORM=linux/riscv64 DEST="kernel/build"
 
 kernel-%:
 	for platform in $(shell echo $(PLATFORM) | tr "," " "); do \

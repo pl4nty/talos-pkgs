@@ -11,6 +11,7 @@ steps:
         sha512: "{{ .openssl_sha512 }}"
     env:
       SOURCE_DATE_EPOCH: {{ .BUILD_ARG_SOURCE_DATE_EPOCH }}
+      TARGET: linux{{ if eq .ARCH "riscv64" }}64{{ end }}-{{ .ARCH }}
     prepare:
       - |
         mkdir openssl
@@ -20,7 +21,7 @@ steps:
         cd openssl
 
         perl ./Configure \
-          linux-${ARCH} \
+          ${TARGET} \
           --prefix=/usr \
           --libdir=lib \
           --openssldir=/etc/ssl3.1 \

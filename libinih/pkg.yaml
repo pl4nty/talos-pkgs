@@ -3,7 +3,9 @@ variant: scratch
 shell: /toolchain/bin/bash
 dependencies:
   - stage: base
+  - stage: libffi
   - stage: openssl
+  - stage: zlib
 steps:
   - sources:
       - url: https://github.com/benhoyt/inih/archive/refs/tags/r{{ .libinih_version }}.tar.gz

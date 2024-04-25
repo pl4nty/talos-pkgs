@@ -1,0 +1,30 @@
+name: zlib
+variant: scratch
+shell: /toolchain/bin/bash
+dependencies:
+  - stage: base
+steps:
+  - sources:
+      - url: https://zlib.net/fossils/zlib-{{ .zlib_version }}.tar.gz
+        destination: zlib.tar.gz
+        sha256: "{{ .zlib_sha256 }}"
+        sha512: "{{ .zlib_sha512 }}"
+    prepare:
+      - |
+        tar -xf zlib.tar.gz --strip-components=1
+        mkdir build
+        cd build
+
+        ../configure \
+            --prefix=/usr
+    build:
+      - |
+        cd build
+        make -j $(nproc)
+    install:
+      - |
+        cd build
+        make DESTDIR=/rootfs install
+finalize:
+  - from: /rootfs
+    to: /

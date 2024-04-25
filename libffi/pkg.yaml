@@ -1,0 +1,28 @@
+name: libffi
+dependencies:
+  - stage: base
+  - stage: texinfo
+steps:
+  - sources:
+      - url: https://github.com/libffi/libffi/releases/download/v{{ .libffi_version }}/libffi-{{ .libffi_version }}.tar.gz
+        destination: libffi.tar.gz
+        sha256: "{{ .libffi_sha256 }}"
+        sha512: "{{ .libffi_sha512 }}"
+    prepare:
+      - |
+        tar -xzf libffi.tar.gz --strip-components=1
+
+        ./configure \
+          --prefix=/usr \
+          --enable-pax_emutramp \
+          --enable-portable-binary \
+          --disable-exec-static-tramp
+    build:
+      - |
+        make -j $(nproc)
+    install:
+      - |
+        make DESTDIR=/rootfs install
+finalize:
+  - from: /rootfs
+    to: /

@@ -5,7 +5,7 @@ dependencies:
   - stage: kernel-build
 steps:
   - env:
-      ARCH: {{ if eq .ARCH "aarch64"}}arm64{{ else if eq .ARCH "x86_64" }}x86_64{{ else }}unsupported{{ end }}
+      ARCH: {{ if eq .ARCH "aarch64"}}arm64{{ else if eq .ARCH "x86_64" }}x86_64{{ else if eq .ARCH "riscv64" }}riscv{{ else }}unsupported{{ end }}
     install:
       - |
         cd /src
@@ -21,6 +21,16 @@ steps:
             arm64)
                 mv arch/arm64/boot/vmlinuz.efi /rootfs/boot/vmlinuz
                 cd ./arch/arm64/boot/dts
+                for vendor in $(find . -not -path . -type d); do
+                  dest="/rootfs/dtb/$vendor"
+                  mkdir -v $dest
+                  find ./$vendor/* -type f -name "*.dtb" -exec cp {} $dest \;
+                done
+                cd -
+            ;;
+            riscv)
+                mv arch/riscv/boot/Image /rootfs/boot/vmlinuz
+                cd ./arch/riscv/boot/dts
                 for vendor in $(find . -not -path . -type d); do
                   dest="/rootfs/dtb/$vendor"
                   mkdir -v $dest

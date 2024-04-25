@@ -1,0 +1,27 @@
+name: texinfo
+dependencies:
+  - stage: base
+steps:
+  - sources:
+      - url: https://ftp.gnu.org/gnu/texinfo/texinfo-{{ .texinfo_version }}.tar.xz
+        destination: texinfo.tar.xz
+        sha256: "{{ .texinfo_sha256 }}"
+        sha512: "{{ .texinfo_sha512 }}"
+    prepare:
+      - |
+        tar -xJf texinfo.tar.xz --strip-components=1
+        mkdir build
+        cd build
+        ../configure \
+            --prefix=/usr
+    build:
+      - |
+        cd build
+        make -j $(nproc)
+    install:
+      - |
+        cd build
+        make DESTDIR=/rootfs install
+finalize:
+  - from: /rootfs
+    to: /

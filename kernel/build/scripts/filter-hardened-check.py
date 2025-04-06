@@ -46,6 +46,9 @@ IGNORE_VIOLATIONS_BY_ARCH = {
         'CONFIG_LSM_MMAP_MIN_ADDR', # on arm64, this can be set only to 32768: https://cateee.net/lkddb/web-lkddb/LSM_MMAP_MIN_ADDR.html
     },
     'amd64': {},
+    'riscv64': {
+        'CONFIG_LSM_MMAP_MIN_ADDR', # wants 65536, "On arm and other archs it should not be higher than 32768": https://cateee.net/lkddb/web-lkddb/LSM_MMAP_MIN_ADDR.html
+    },
 }
 
 def main():

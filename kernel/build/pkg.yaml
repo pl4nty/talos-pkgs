@@ -5,12 +5,15 @@ dependencies:
   - stage: kernel-prepare
 steps:
   - env:
-      CARCH: {{ if eq .ARCH "aarch64"}}arm64{{ else if eq .ARCH "x86_64" }}amd64{{ else }}unsupported{{ end }}
-      ARCH: {{ if eq .ARCH "aarch64"}}arm64{{ else if eq .ARCH "x86_64" }}x86{{ else }}unsupported{{ end }}
+      CARCH: {{ if eq .ARCH "aarch64"}}arm64{{ else if eq .ARCH "x86_64" }}amd64{{ else if eq .ARCH "riscv64" }}riscv64{{ else }}unsupported{{ end }}
+      ARCH: {{ if eq .ARCH "aarch64"}}arm64{{ else if eq .ARCH "x86_64" }}x86{{ else if eq .ARCH "riscv64" }}riscv{{ else }}unsupported{{ end }}
+      KBUILD_OUTPUT: /src/build
+    cachePaths:
+      - /src/build
     prepare:
       - |
         cd /src
-        cp -v /pkg/config-${CARCH} .config
+        cp -v /pkg/config-${CARCH} ${KBUILD_OUTPUT}/.config
         cp -v /pkg/certs/* certs/
       - |
         cd /src
@@ -27,22 +30,22 @@ steps:
       {{ else }}
       - |
         cd /src
-        python3 /toolchain/kernel-hardening-checker/bin/kernel-hardening-checker -c .config -m json | python3 /pkg/scripts/filter-hardened-check.py ${CARCH}
+        python3 /toolchain/kernel-hardening-checker/bin/kernel-hardening-checker -c ${KBUILD_OUTPUT}/.config -m json | python3 /pkg/scripts/filter-hardened-check.py ${CARCH}
       - |
         cd /src
 
         make -j $(nproc)
         make -j $(nproc) modules
 
-        if [[ "${ARCH}" == "arm64" ]]; then
+        if [ "${ARCH}" == "arm64" ] | [ "${ARCH}" = "riscv" ]; then
           echo "Compiling device-tree blobs"
           make -j $(nproc) DTC_FLAGS=-@ dtbs
         fi
       {{ end }}
 finalize:
   {{ if .BUILD_ARG_KERNEL_TARGET }}
-  - from: /src/.config
-    to: config-{{ if eq .ARCH "aarch64"}}arm64{{ else if eq .ARCH "x86_64" }}amd64{{ else }}unsupported{{ end }}
+  - from: {{ .KBUILD_OUTPUT }}/.config
+    to: config-{{ if eq .ARCH "aarch64"}}arm64{{ else if eq .ARCH "x86_64" }}amd64{{ else if eq .ARCH "riscv64" }}riscv64{{ else }}unsupported{{ end }}
   {{ else }}
   - from: /src
     to: /src

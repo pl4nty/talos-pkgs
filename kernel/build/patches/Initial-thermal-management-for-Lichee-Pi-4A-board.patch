@@ -1,0 +1,175 @@
+diff --git a/arch/riscv/boot/dts/thead/th1520-lichee-pi-4a.dts b/arch/riscv/boot/dts/thead/th1520-lichee-pi-4a.dts
+index c58c2085ca92..b8b2914f2cfc 100644
+--- a/arch/riscv/boot/dts/thead/th1520-lichee-pi-4a.dts
++++ b/arch/riscv/boot/dts/thead/th1520-lichee-pi-4a.dts
+@@ -4,6 +4,7 @@
+  */
+ 
+ #include "th1520-lichee-module-4a.dtsi"
++#include <dt-bindings/gpio/gpio.h>
+ 
+ / {
+ 	model = "Sipeed Lichee Pi 4A";
+@@ -29,75 +30,60 @@ chosen {
+ 		stdout-path = "serial0:115200n8";
+ 	};
+ 
+-	thermal-zones {
+-		cpu-thermal {
+-			polling-delay = <1000>;
+-			polling-delay-passive = <1000>;
+-			thermal-sensors = <&pvt 0>;
+-
+-			trips {
+-				fan_config0: fan-trip0 {
+-					temperature = <39000>;
+-					hysteresis = <5000>;
+-					type = "active";
+-				};
+-
+-				fan_config1: fan-trip1 {
+-					temperature = <50000>;
+-					hysteresis = <5000>;
+-					type = "active";
+-				};
+-
+-				fan_config2: fan-trip2 {
+-					temperature = <60000>;
+-					hysteresis = <5000>;
+-					type = "active";
+-				};
+-			};
+-
+-			cooling-maps {
+-				map-active-0 {
+-					cooling-device = <&fan 1 1>;
+-					trip = <&fan_config0>;
+-				};
+-
+-				map-active-1 {
+-					cooling-device = <&fan 2 2>;
+-					trip = <&fan_config1>;
+-				};
+-
+-				map-active-2 {
+-					cooling-device = <&fan 3 3>;
+-					trip = <&fan_config2>;
+-				};
+-			};
+-		};
++	gpio_pwm: gpio-pwm {
++		#pwm-cells = <3>;
++		compatible = "pwm-gpio";
++		gpios = <&gpio3 3 GPIO_ACTIVE_HIGH>;
+ 	};
+ 
+ 	fan: pwm-fan {
+-		pinctrl-names = "default";
+-		pinctrl-0 = <&fan_pins>;
+ 		compatible = "pwm-fan";
+ 		#cooling-cells = <2>;
+-		pwms = <&pwm 1 10000000 0>;
++		pwms = <&gpio_pwm 0 100000000 0>;
+ 		cooling-levels = <0 66 196 255>;
+ 	};
+-
+ };
+ 
+-&padctrl0_apsys {
+-	fan_pins: fan-0 {
+-		pwm1-pins {
+-			pins = "GPIO3_3"; /* PWM1 */
+-			function = "pwm";
+-			bias-disable;
+-			drive-strength = <25>;
+-			input-disable;
+-			input-schmitt-disable;
+-			slew-rate = <0>;
++&cpu_thermal_zone {
++	trips {
++		fan_config0: fan-trip0 {
++			temperature = <40000>;
++			hysteresis = <8000>;
++			type = "active";
++		};
++
++		fan_config1: fan-trip1 {
++			temperature = <50000>;
++			hysteresis = <8000>;
++			type = "active";
++		};
++
++		fan_config2: fan-trip2 {
++			temperature = <60000>;
++			hysteresis = <8000>;
++			type = "active";
+ 		};
+ 	};
+ 
++	cooling-maps {
++		map-active-0 {
++			cooling-device = <&fan 1 1>;
++			trip = <&fan_config0>;
++		};
++
++		map-active-1 {
++			cooling-device = <&fan 2 2>;
++			trip = <&fan_config1>;
++		};
++
++		map-active-2 {
++			cooling-device = <&fan 3 3>;
++			trip = <&fan_config2>;
++		};
++	};
++};
++
++&padctrl0_apsys {
+ 	uart0_pins: uart0-0 {
+ 		tx-pins {
+ 			pins = "UART0_TXD";
+diff --git a/arch/riscv/boot/dts/thead/th1520.dtsi b/arch/riscv/boot/dts/thead/th1520.dtsi
+index bd5d33840884..eb9c8f3567cb 100644
+--- a/arch/riscv/boot/dts/thead/th1520.dtsi
++++ b/arch/riscv/boot/dts/thead/th1520.dtsi
+@@ -753,6 +753,10 @@ pvt: pvt@fffff4e000 {
+ 			reg-names = "common", "ts", "pd", "vm";
+ 			clocks = <&aonsys_clk>;
+ 			#thermal-sensor-cells = <1>;
++			moortec,ts-coeff-g = <42740>;
++			moortec,ts-coeff-h = <220500>;
++			moortec,ts-coeff-j = <(-160)>;
++			moortec,ts-coeff-cal5 = <4094>;
+ 		};
+ 
+ 		gpio@fffff52000 {
+@@ -774,4 +778,29 @@ gpio4: gpio-controller@0 {
+ 			};
+ 		};
+ 	};
++
++	thermal-zones {
++		cpu_thermal_zone: cpu-thermal {
++			polling-delay-passive = <250>;
++			polling-delay = <15000>;
++
++			thermal-sensors = <&pvt 0>;
++
++			trips {
++				cpu_crit: crit-trip {
++					/* milliCelsius */
++					temperature = <110000>;
++					hysteresis = <2000>;
++					type = "critical";
++				};
++			};
++		};
++
++		ddrc-thermal {
++			polling-delay-passive = <250>;
++			polling-delay = <15000>;
++
++			thermal-sensors = <&pvt 1>;
++		};
++	};
+ };

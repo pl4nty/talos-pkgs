@@ -1,11 +1,11 @@
-# syntax = ghcr.io/siderolabs/bldr:v0.5.5
+# syntax = ghcr.io/pl4nty/bldr:4b1d7bb
 
 format: v1alpha2
 
 vars:
-  TOOLCHAIN_MUSL_IMAGE: ghcr.io/siderolabs/toolchain-musl:v1.12.0
-  TOOLS_PREFIX: ghcr.io/siderolabs/
-  TOOLS_REV: v1.12.0
+  TOOLCHAIN_MUSL_IMAGE: ghcr.io/pl4nty/toolchain-musl:09e8088
+  TOOLS_PREFIX: ghcr.io/pl4nty/
+  TOOLS_REV: 297acde
 
   # renovate: datasource=github-releases depName=containernetworking/plugins
   cni_version: v1.8.0
@@ -91,10 +91,12 @@ vars:
   kspp_sha256: 3e5f3ea80c6e82afd5550211d240daabf0676e900ca651b3a207c6946e04521d
   kspp_sha512: 6ca9521dc15a5897b490a6e2a3e262f09922f0cbf03e1abba4819f9bdee36e2f08fb5acd7c6cb49d50fcd323cdf571222da42f934fa7d8f55c4fa69be5b2b545
 
-  # renovate: datasource=git-tags extractVersion=^v(?<version>.*)$ depName=git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git
-  linux_version: 6.17.7
-  linux_sha256: ddf2ea0d4439e1d57136be3623102af9458f601f5b1cb77e83246e88aea09d0e
-  linux_sha512: f16f28c395374099ccf21d9df654a31746ed3f09376f7f9eca172579787b7b493d3878cb0a44348c2846bba93f7950f04b0e45235152860e4789fdd2aa9711cb
+  # CONFIG_PWM_TH1520 (fan) is in queue for 6.19, but needs Rust...
+  # CONFIG_MMC_SDHCI_OF_DWCMSHC and CONFIG_DW_AXI_DMAC=y not m to troubleshoot DMA issues
+  # renovate: datasource=git-tags extractVersion=^next-(?<version>.*)$ depName=git://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
+  linux_version: 20251121
+  linux_sha256: c073609ebdfaa6466b5ffc0fe3a675d66bb706d8a28187d8805177f067dfb8a6
+  linux_sha512: f123c12e58b0d07b0d4f3bb9313ad360284bc9d4c7b34a55b3b7effc208108ebf93cf4eb05857f2a52658ff67b2dfb6381f0ef0bf5b43a9c1e035eb7f2428d21
 
   # renovate: datasource=git-tags extractVersion=^libaio-(?<version>.*)$ depName=https://pagure.io/libaio.git
   libaio_version: 0.3.113

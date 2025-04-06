@@ -1,11 +1,11 @@
-# syntax = ghcr.io/siderolabs/bldr:v0.4.1
+# syntax = ghcr.io/pl4nty/bldr
 
 format: v1alpha2
 
 vars:
-  TOOLCHAIN_MUSL_IMAGE: ghcr.io/siderolabs/toolchain-musl:v1.11.0-alpha.0-2-g96a1a28
-  TOOLS_PREFIX: ghcr.io/siderolabs/
-  TOOLS_REV: v1.11.0-alpha.0-3-g1dfd14b
+  TOOLCHAIN_MUSL_IMAGE: ghcr.io/pl4nty/toolchain-musl
+  TOOLS_PREFIX: ghcr.io/pl4nty/
+  TOOLS_REV: latest
 
   # renovate: datasource=github-releases depName=containernetworking/plugins
   cni_version: v1.7.1
@@ -89,10 +89,12 @@ vars:
   kspp_sha256: af07456c9bd33e7e79633df3c93484c98ccfff8dfad28e705cc46114a6715068
   kspp_sha512: f8ad4c7cce39225c77e216cad2933136a99e42759d3247eaca0a0f0ab06404c851b8bddbd1512584759248202085a15666ca4aeeae684526084617cf05d0193f
 
+  # 6.13+ for KASAN https://patchwork.kernel.org/project/linux-riscv/patch/20241126143250.29708-1-palmer@rivosinc.com/
+  # mainline for Lichee Pi 4A fan controller
   # renovate: datasource=git-tags extractVersion=^v(?<version>.*)$ depName=git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git
-  linux_version: 6.12.31
-  linux_sha256: b04c5b3e5df6e0aa5e9cd1efe527fac99f9dd39a43b97f13b22f8ca93e524ba7
-  linux_sha512: 9e70e7e8ef4681e0f1ec908a31f74c5632690ef4b8b45331c46c71f9c89637134b8fd3b06ef508799da20e03ebfdfbbdd8ba16f85eb21f76f0f96ccf410543dd
+  linux_version: 6.16-rc1
+  linux_sha256: a093bd107df3864b2e08250c7aa4b62f612a325f23e9a52be35d88637300d5fc
+  linux_sha512: 5f1817610c66da3c15e33e3f84b1a3e1449f8f1aaddb390603b884d3a8a49ca66e1059a9a27a63d6a5770277af548f2fccf1c193adb366664ae33c00ec5839c3
 
   # renovate: datasource=git-tags extractVersion=^libaio-(?<version>.*)$ depName=https://pagure.io/libaio.git
   libaio_version: 0.3.113

@@ -1,6 +1,6 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED, PLEASE DO NOT EDIT.
 #
-# Generated on 2025-05-22T08:27:49Z by kres 9f64b0d.
+# Generated on 2025-05-07T02:25:21Z by kres 1a0156b.
 
 # common variables
 
@@ -65,8 +65,6 @@ TARGETS += libattr
 TARGETS += libburn
 TARGETS += libcap
 TARGETS += libinih
-TARGETS += libisoburn
-TARGETS += libisofs
 TARGETS += libjson-c
 TARGETS += liblzma
 TARGETS += libmnl
@@ -98,17 +96,9 @@ TARGETS += xz
 TARGETS += zlib
 TARGETS += zstd
 TARGETS += kernel
-TARGETS += drbd-pkg
-TARGETS += ena-pkg
-TARGETS += gasket-driver-pkg
 TARGETS += hailort-pkg
-TARGETS += nvidia-open-gpu-kernel-modules-lts-pkg
-TARGETS += nvidia-open-gpu-kernel-modules-production-pkg
 TARGETS += tenstorrent-pkg
-TARGETS += xdma-driver-pkg
-TARGETS += zfs-pkg
-NONFREE_TARGETS = nonfree-kmod-nvidia-lts-pkg
-NONFREE_TARGETS += nonfree-kmod-nvidia-production-pkg
+NONFREE_TARGETS =
 
 # help menu
 
@@ -200,8 +190,7 @@ deps.png:  ## Generates a dependency graph of the Pkgfile.
 	@$(BLDR) graph | dot -Tpng -o deps.png
 
 kernel-olddefconfig:
-	@$(MAKE) local-kernel-build TARGET_ARGS="--build-arg=KERNEL_TARGET=olddefconfig" PLATFORM=linux/amd64 DEST="kernel/build"
-	@$(MAKE) local-kernel-build TARGET_ARGS="--build-arg=KERNEL_TARGET=olddefconfig" PLATFORM=linux/arm64 DEST="kernel/build"
+	@$(MAKE) local-kernel-build TARGET_ARGS="--build-arg=KERNEL_TARGET=olddefconfig" PLATFORM=linux/riscv64 DEST="kernel/build"
 
 kernel-%:
 	for platform in $(shell echo $(PLATFORM) | tr "," " "); do \

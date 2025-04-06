@@ -24,8 +24,9 @@ spec:
     - libburn
     - libcap
     - libinih
-    - libisoburn
-    - libisofs
+    # libisofs autoconf is ancient, missing riscv64
+    # - libisoburn
+    # - libisofs
     - libjson-c
     - liblzma
     - libmnl
@@ -59,19 +60,26 @@ spec:
     # - kernel & dependent packages (out of tree kernel modules)
     #   kernel first, then packages in alphabetical order
     - kernel
-    - drbd-pkg
-    - ena-pkg
-    - gasket-driver-pkg
+    # max kernel probably 6.15
+    # - drbd-pkg
+    # max kernel 6.15
+    # - ena-pkg
+    # max kernel 6.12 pending https://github.com/google/gasket-driver/pull/40
+    # - gasket-driver-pkg
     - hailort-pkg
-    - nvidia-open-gpu-kernel-modules-lts-pkg
-    - nvidia-open-gpu-kernel-modules-production-pkg
+    # RISC-V unsupported https://github.com/NVIDIA/open-gpu-kernel-modules/pull/152
+    # - nvidia-open-gpu-kernel-modules-lts-pkg
+    # - nvidia-open-gpu-kernel-modules-production-pkg
     - tenstorrent-pkg
-    - xdma-driver-pkg
-    - zfs-pkg
+    # TODO complains about missing libxdma_api.h, CONFIG_XILINX_XDMA didn't help
+    # - xdma-driver-pkg
+    # max kernel 6.14 pending https://github.com/openzfs/zfs/issues/17439
+    # - zfs-pkg
   additionalTargets:
     nonfree:
-      - nonfree-kmod-nvidia-lts-pkg
-      - nonfree-kmod-nvidia-production-pkg
+      # RISC-V unsupported https://download.nvidia.com/XFree86/
+      # - nonfree-kmod-nvidia-lts-pkg
+      # - nonfree-kmod-nvidia-production-pkg
   reproducibleTargetName: reproducibility
 ---
 kind: auto.CustomSteps
@@ -89,8 +97,7 @@ spec:
     enabled: true
     script:
       - |
-        @$(MAKE) local-kernel-build TARGET_ARGS="--build-arg=KERNEL_TARGET=olddefconfig" PLATFORM=linux/amd64 DEST="kernel/build"
-        @$(MAKE) local-kernel-build TARGET_ARGS="--build-arg=KERNEL_TARGET=olddefconfig" PLATFORM=linux/arm64 DEST="kernel/build"
+        @$(MAKE) local-kernel-build TARGET_ARGS="--build-arg=KERNEL_TARGET=olddefconfig" PLATFORM=linux/riscv64 DEST="kernel/build"
 ---
 kind: custom.Step
 name: kernel-%

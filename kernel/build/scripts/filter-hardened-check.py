@@ -44,6 +44,7 @@ IGNORE_VIOLATIONS_BY_ARCH = {
         'CONFIG_UNWIND_PATCH_PAC_INTO_SCS', # this is a Clang feature, we use gcc
     },
     'amd64': {},
+    'riscv64': {},
 }
 
 def main():

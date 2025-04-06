@@ -24,8 +24,9 @@ spec:
     - libburn
     - libcap
     - libinih
-    - libisoburn
-    - libisofs
+    # libisofs autoconf is ancient, missing riscv64
+    # - libisoburn
+    # - libisofs
     - libjson-c
     - liblzma
     - libmnl
@@ -61,14 +62,16 @@ spec:
     - drbd-pkg
     - ena-pkg
     - gasket-driver-pkg
-    - nvidia-open-gpu-kernel-modules-lts-pkg
-    - nvidia-open-gpu-kernel-modules-production-pkg
+    # https://github.com/NVIDIA/open-gpu-kernel-modules/pull/152
+    # - nvidia-open-gpu-kernel-modules-lts-pkg
+    # - nvidia-open-gpu-kernel-modules-production-pkg
     - xdma-driver-pkg
     - zfs-pkg
   additionalTargets:
     nonfree:
-      - nonfree-kmod-nvidia-lts-pkg
-      - nonfree-kmod-nvidia-production-pkg
+      # https://download.nvidia.com/XFree86/
+      # - nonfree-kmod-nvidia-lts-pkg
+      # - nonfree-kmod-nvidia-production-pkg
   reproducibleTargetName: reproducibility
 ---
 kind: auto.CustomSteps
@@ -86,8 +89,7 @@ spec:
     enabled: true
     script:
       - |
-        @$(MAKE) local-kernel-build TARGET_ARGS="--build-arg=KERNEL_TARGET=olddefconfig" PLATFORM=linux/amd64 DEST="kernel/build"
-        @$(MAKE) local-kernel-build TARGET_ARGS="--build-arg=KERNEL_TARGET=olddefconfig" PLATFORM=linux/arm64 DEST="kernel/build"
+        @$(MAKE) local-kernel-build TARGET_ARGS="--build-arg=KERNEL_TARGET=olddefconfig" PLATFORM=linux/riscv64 DEST="kernel/build"
 ---
 kind: custom.Step
 name: kernel-%

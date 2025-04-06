@@ -1,11 +1,11 @@
-# syntax = ghcr.io/siderolabs/bldr:v0.4.1
+# syntax = ghcr.io/pl4nty/bldr
 
 format: v1alpha2
 
 vars:
-  TOOLCHAIN_MUSL_IMAGE: ghcr.io/siderolabs/toolchain-musl:v1.11.0-alpha.0-1-gfa0b147
-  TOOLS_PREFIX: ghcr.io/siderolabs/
-  TOOLS_REV: v1.11.0-alpha.0-1-ge35234b
+  TOOLCHAIN_MUSL_IMAGE: ghcr.io/pl4nty/toolchain-musl
+  TOOLS_PREFIX: ghcr.io/pl4nty/
+  TOOLS_REV: latest
 
   # renovate: datasource=github-releases depName=containernetworking/plugins
   cni_version: v1.7.1
@@ -85,9 +85,10 @@ vars:
   kspp_sha512: 32df2db7c83bb48faec6e4af916be6579e9bb36afc7c315aea5cc348378c85b651ef1da5dc3bdfc800d0860c65a6a1a1de89d2f2c0eaf7a17ffc7ed1a5f3b0e0
 
   # renovate: datasource=git-tags extractVersion=^v(?<version>.*)$ depName=git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git
-  linux_version: 6.12.27
-  linux_sha256: 8f4655a4cc7f93d72f515bbca54756de26ddaf5949790da6a17f766e3c33dc79
-  linux_sha512: f875960e1cc23bd9ef388c0c1224ab10c2093120ab946954bb075692e3ab35dc0d1b99f5353f6cfd4e0634f783d332985165b2539ce792ffbe164debcbc5cf7f
+  linux_version: 6.14.6
+  linux_sha256: 21817f1998e2230f81f7e4f605fa6fdcb040e14fa27d99c27ddb16ce749797a9
+  linux_sha512: 092cee673c116dc737e00ec52da58475d039dd2e8f9cfb8d645971e754862c0042146e4011a2854f0bbe3ea8f78ce1aef11cff66a471f3daf3f467ceff5987eb
+  # KASAN https://patchwork.kernel.org/project/linux-riscv/patch/20241126143250.29708-1-palmer@rivosinc.com/
 
   # renovate: datasource=git-tags extractVersion=^libaio-(?<version>.*)$ depName=https://pagure.io/libaio.git
   libaio_version: 0.3.113

@@ -11,18 +11,20 @@ steps:
         sha256: "{{ .tenstorrent_sha256 }}"
         sha512: "{{ .tenstorrent_sha512 }}"
     env:
-      ARCH: {{ if eq .ARCH "aarch64"}}arm64{{ else if eq .ARCH "x86_64" }}x86_64{{ else }}unsupported{{ end }}
+      ARCH: {{ if eq .ARCH "aarch64"}}arm64{{ else if eq .ARCH "x86_64" }}x86_64{{ else if eq .ARCH "riscv64" }}riscv{{ else }}unsupported{{ end }}
+    cachePaths:
+      - /src/build
     prepare:
       - |
         tar xf tt-kmd.tar.gz --strip-components=1
       - |
-        mkdir -p /rootfs/usr/lib/modules/$(cat /src/include/config/kernel.release) /rootfs/etc/udev/rules.d/
+        mkdir -p /rootfs/usr/lib/modules/$(cat /src/build/include/config/kernel.release) /rootfs/etc/udev/rules.d/
     build:
       - |
-        make -j $(nproc) KDIR=/src/
+        make -j $(nproc) KDIR=/src/build
     install:
       - |
-        make -j $(nproc) modules_install KDIR=/src INSTALL_MOD_PATH=/rootfs/usr INSTALL_MOD_DIR=extras INSTALL_MOD_STRIP=1
+        make -j $(nproc) modules_install KDIR=/src/build INSTALL_MOD_PATH=/rootfs/usr INSTALL_MOD_DIR=extras INSTALL_MOD_STRIP=1 CONFIG_MODULE_SIG_KEY=/src/build/certs/signing_key.pem
         cp udev-50-tenstorrent.rules /rootfs/etc/udev/rules.d/50-tenstorrent.rules
     test:
       - |

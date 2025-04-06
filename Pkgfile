@@ -1,11 +1,11 @@
-# syntax = ghcr.io/siderolabs/bldr:v0.5.6
+# syntax = ghcr.io/pl4nty/bldr:f1dc7d2
 
 format: v1alpha2
 
 vars:
-  TOOLCHAIN_MUSL_IMAGE: ghcr.io/siderolabs/toolchain-musl:v1.13.0-alpha.0-2-g0823283
-  TOOLS_PREFIX: ghcr.io/siderolabs/
-  TOOLS_REV: v1.13.0-alpha.0-6-g896f8b9
+  TOOLCHAIN_MUSL_IMAGE: ghcr.io/pl4nty/toolchain-musl:4b8a4f3
+  TOOLS_PREFIX: ghcr.io/pl4nty/
+  TOOLS_REV: 503825a
 
   # renovate: datasource=github-releases depName=containernetworking/plugins
   cni_version: v1.9.0
@@ -71,10 +71,11 @@ vars:
   hailort_fw_sha256: 1ba9528972091ec17bebc0dc7ea2e6f4449efe70664890f6387ccbc7b60626ee
   hailort_fw_sha512: 6280e4bddc120ab6e9a4a4fdac529816ee1f94d343e0e0ef6c36fd474b579f85032e22b24a8f758b23028d429ef5936780fa07ed3c0abc512f5fd72985fc982c
 
-  # renovate: datasource=github-releases depName=intel/isa-l
-  igzip_version: 2.31.1
-  igzip_sha256: e1d5573a4019738243b568ab1e1422e6ab7557c5cae33cc8686944d327ad6bb4
-  igzip_sha512: 65199d054af1edc26d477883f7878f25fd4db65622aa98247069f1296c5f07b75da24f0361a6c3889ddb3168d940b508cd2f6340548a62ff3157977179fd002d
+  # pending 2.32 with riscv64 https://github.com/intel/isa-l/issues/239
+  # renovate: datasource=git-refs versioning=git depName=https://github.com/intel/isa-l.git
+  igzip_version: 90f1670353549ed45e395ffedc4b4d2fdcb2b378
+  igzip_sha256: 27717e7121679215f57c586ef636ffff29435b5234693c9bf3abd41d39b0aaad
+  igzip_sha512: 31e571414b5225ad1c651f5d5816dbc387d4fdd9586663305d824aa1670443e278916d9af3b7284e26fde54f128a59747c11aee678bfe8e3e73069ce30dd33ee
 
   # renovate: datasource=github-releases extractVersion=^IPMITOOL_(?<version>.*)$ depName=ipmitool/ipmitool
   ipmitool_version: 1_8_19
@@ -96,10 +97,13 @@ vars:
   kspp_sha256: 36dd7901ddd924159bc04283569d2ce12516e0efd0ccea5e5fb929662f454051
   kspp_sha512: 684d1be64bcba6cbb890675b17e601d7d7d9255f6fb90452415ebd1dfbb6357e7a484b9e64621749a3d71be78d73021d063cd839ece68884313f517324206e30
 
-  # renovate: datasource=git-tags extractVersion=^v(?<version>.*)$ depName=git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git
-  linux_version: 6.18.2
-  linux_sha256: 558c6bbab749492b34f99827fe807b0039a744693c21d3a7e03b3a48edaab96a
-  linux_sha512: 15989d1a26c6a5200b8eab4ba348b308466398aa75dda3844b37e7eb320206236d47c94cbc0e0b1d7ead10385ca84d34d0f2aa02ba5c1bd65ca6a5aa71c57117
+  # CONFIG_PWM_TH1520 (fan) is in queue for 6.19, but needs Rust...
+  # CONFIG_MMC_SDHCI_OF_DWCMSHC and CONFIG_DW_AXI_DMAC=y not m to troubleshoot DMA issues
+  # extractVersion=^next-(?<version>.*)$ depName=git://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
+  # renovate: datasource=git-tags extractVersion=^v(?<major>\\d+)\\.(?<minor>\\d+)(-rc(?<prerelease>\\d+))?$ depName=git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git
+  linux_version: 6.19-rc3
+  linux_sha256: 4d26f2c2e326444613ffd3dab3ff3c42083e68e5146d34c272086327d264ee1a
+  linux_sha512: 7cb366f06895115acd7eed52354cb67950dcb902bd73aa2b9c06c9b6da61ddda38e839f4dc55a90169f3b68a7cd2efbc82c36f9437ca31c7f67dab5a9091f3fa
 
   # renovate: datasource=git-tags extractVersion=^libaio-(?<version>.*)$ depName=https://pagure.io/libaio.git
   libaio_version: 0.3.113
@@ -278,8 +282,9 @@ vars:
   zfs_sha256: 7bdf13de0a71d95554c0e3e47d5e8f50786c30d4f4b63b7c593b1d11af75c9ee
   zfs_sha512: 5f4460707cc24c55900a08d106e549ecc9eb42bc7b64e0fb613d85ba2054c3bc834fb10c34822ef14406dfcfc07b38b7ca668a02086eecb0f107d2ffce66a998
 
+  # NOTE: v4 requires autoconf-archive
   # renovate: datasource=git-tags depName=https://gitlab.com/apparmor/apparmor.git
-  apparmor_version: v3.1.7 # v4 requires autoconf-archive
+  apparmor_version: v3.1.7
   apparmor_sha256: 64494bd99fa6547a9cbdb4fc6bc732451a02dd19e6eb70eab977b239632151eb
   apparmor_sha512: cfd6b0afb98d4559c16a6a2e23ca16ee9d86325fc6059313df5d3e8feba3d398f96a5754d3880dd2cafb2e7b1a06bd789d62cd36aaf993e46290f6311bb49dac
 

@@ -1,0 +1,240 @@
+From f50349665a0eb5d1eef2e3a104f4d66a77354879 Mon Sep 17 00:00:00 2001
+From: Julian Zhu <julian.oerv@isrc.iscas.ac.cn>
+Date: Thu, 1 Jan 2026 16:23:51 +0800
+Subject: [PATCH] build: maintain compatibility with non-vector devices for
+ riscv64
+
+When the compiler supports vector extensions, the -march option always
+enables vector by default. This causes illegal instruction errors on RISC-V CPU without vector support. It is sufficient to enable the vector extension in the assembler via
+.option arch, +v.
+
+Signed-off-by: Julian Zhu <julian.oerv@isrc.iscas.ac.cn>
+---
+ README.md                                    | 7 +++++++
+ configure.ac                                 | 6 +-----
+ erasure_code/riscv64/gf_2vect_dot_prod_rvv.S | 1 +
+ erasure_code/riscv64/gf_2vect_mad_rvv.S      | 1 +
+ erasure_code/riscv64/gf_3vect_dot_prod_rvv.S | 1 +
+ erasure_code/riscv64/gf_3vect_mad_rvv.S      | 1 +
+ erasure_code/riscv64/gf_4vect_dot_prod_rvv.S | 1 +
+ erasure_code/riscv64/gf_4vect_mad_rvv.S      | 1 +
+ erasure_code/riscv64/gf_5vect_dot_prod_rvv.S | 1 +
+ erasure_code/riscv64/gf_5vect_mad_rvv.S      | 1 +
+ erasure_code/riscv64/gf_6vect_dot_prod_rvv.S | 1 +
+ erasure_code/riscv64/gf_6vect_mad_rvv.S      | 1 +
+ erasure_code/riscv64/gf_7vect_dot_prod_rvv.S | 1 +
+ erasure_code/riscv64/gf_vect_dot_prod_rvv.S  | 1 +
+ erasure_code/riscv64/gf_vect_mad_rvv.S       | 1 +
+ erasure_code/riscv64/gf_vect_mul_rvv.S       | 1 +
+ 16 files changed, 22 insertions(+), 5 deletions(-)
+
+diff --git a/README.md b/README.md
+index fffd60c0..b0d72999 100644
+--- a/README.md
++++ b/README.md
+@@ -46,6 +46,13 @@ aarch64:
+ * Assembler: gas v2.24 or later.
+ * Compiler: gcc v4.7 or later.
+ 
++RISC-V 64:
++* Portable base functions:
++	* Supported by most C compilers.
++* For RISC-V Vector (RVV) support:
++	* Assembler: gas v2.39 or later.
++	* Compiler: gcc v12.1 or later.
++
+ other:
+ * Compiler: Portable base functions are available that build with most C compilers.
+ 
+diff --git a/configure.ac b/configure.ac
+index a425c607..31a6d0f3 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -57,7 +57,7 @@ case "${CPU}" in
+ 
+ 	riscv64)
+ 
+-		AC_MSG_CHECKING([checking RVV support])
++		AC_MSG_CHECKING([whether compiler supports RISC-V Vector Extension (RVV)])
+ 		AC_COMPILE_IFELSE(
+ 			[AC_LANG_PROGRAM([], [
+ 				__asm__ volatile(
+@@ -70,10 +70,6 @@ case "${CPU}" in
+ 			[AC_DEFINE([HAVE_RVV], [0], [Disable RVV instructions])
+ 			AM_CONDITIONAL([HAVE_RVV], [false]) rvv=no]
+ 		)
+-		if test "x$rvv" = "xyes"; then
+-			CFLAGS+=" -march=rv64gcv"
+-			CCASFLAGS+=" -march=rv64gcv"
+-		fi
+ 		AC_MSG_RESULT([$rvv])
+ 		;;
+ 
+diff --git a/erasure_code/riscv64/gf_2vect_dot_prod_rvv.S b/erasure_code/riscv64/gf_2vect_dot_prod_rvv.S
+index cdb695fa..1efd7c45 100644
+--- a/erasure_code/riscv64/gf_2vect_dot_prod_rvv.S
++++ b/erasure_code/riscv64/gf_2vect_dot_prod_rvv.S
+@@ -31,6 +31,7 @@
+ .text
+ .align 2
+ 
++.option arch, +v
+ .global gf_2vect_dot_prod_rvv
+ .type gf_2vect_dot_prod_rvv, @function
+ 
+diff --git a/erasure_code/riscv64/gf_2vect_mad_rvv.S b/erasure_code/riscv64/gf_2vect_mad_rvv.S
+index fd569e57..4358f311 100644
+--- a/erasure_code/riscv64/gf_2vect_mad_rvv.S
++++ b/erasure_code/riscv64/gf_2vect_mad_rvv.S
+@@ -31,6 +31,7 @@
+ .text
+ .align 2
+ 
++.option arch, +v
+ .global gf_2vect_mad_rvv
+ .type gf_2vect_mad_rvv, @function
+ 
+diff --git a/erasure_code/riscv64/gf_3vect_dot_prod_rvv.S b/erasure_code/riscv64/gf_3vect_dot_prod_rvv.S
+index 6975c087..cf2e114e 100644
+--- a/erasure_code/riscv64/gf_3vect_dot_prod_rvv.S
++++ b/erasure_code/riscv64/gf_3vect_dot_prod_rvv.S
+@@ -31,6 +31,7 @@
+ .text
+ .align 2
+ 
++.option arch, +v
+ .global gf_3vect_dot_prod_rvv
+ .type gf_3vect_dot_prod_rvv, @function
+ 
+diff --git a/erasure_code/riscv64/gf_3vect_mad_rvv.S b/erasure_code/riscv64/gf_3vect_mad_rvv.S
+index 920a0217..4b38c699 100644
+--- a/erasure_code/riscv64/gf_3vect_mad_rvv.S
++++ b/erasure_code/riscv64/gf_3vect_mad_rvv.S
+@@ -31,6 +31,7 @@
+ .text
+ .align 2
+ 
++.option arch, +v
+ .global gf_3vect_mad_rvv
+ .type gf_3vect_mad_rvv, @function
+ 
+diff --git a/erasure_code/riscv64/gf_4vect_dot_prod_rvv.S b/erasure_code/riscv64/gf_4vect_dot_prod_rvv.S
+index 0a627e56..a845cfe2 100644
+--- a/erasure_code/riscv64/gf_4vect_dot_prod_rvv.S
++++ b/erasure_code/riscv64/gf_4vect_dot_prod_rvv.S
+@@ -31,6 +31,7 @@
+ .text
+ .align 2
+ 
++.option arch, +v
+ .global gf_4vect_dot_prod_rvv
+ .type gf_4vect_dot_prod_rvv, @function
+ 
+diff --git a/erasure_code/riscv64/gf_4vect_mad_rvv.S b/erasure_code/riscv64/gf_4vect_mad_rvv.S
+index 3c98bc7f..b7770481 100644
+--- a/erasure_code/riscv64/gf_4vect_mad_rvv.S
++++ b/erasure_code/riscv64/gf_4vect_mad_rvv.S
+@@ -31,6 +31,7 @@
+ .text
+ .align 2
+ 
++.option arch, +v
+ .global gf_4vect_mad_rvv
+ .type gf_4vect_mad_rvv, @function
+ 
+diff --git a/erasure_code/riscv64/gf_5vect_dot_prod_rvv.S b/erasure_code/riscv64/gf_5vect_dot_prod_rvv.S
+index 629ef314..41b574f8 100644
+--- a/erasure_code/riscv64/gf_5vect_dot_prod_rvv.S
++++ b/erasure_code/riscv64/gf_5vect_dot_prod_rvv.S
+@@ -31,6 +31,7 @@
+ .text
+ .align 2
+ 
++.option arch, +v
+ .global gf_5vect_dot_prod_rvv
+ .type gf_5vect_dot_prod_rvv, @function
+ 
+diff --git a/erasure_code/riscv64/gf_5vect_mad_rvv.S b/erasure_code/riscv64/gf_5vect_mad_rvv.S
+index b4f5954e..5a85ba18 100644
+--- a/erasure_code/riscv64/gf_5vect_mad_rvv.S
++++ b/erasure_code/riscv64/gf_5vect_mad_rvv.S
+@@ -31,6 +31,7 @@
+ .text
+ .align 2
+ 
++.option arch, +v
+ .global gf_5vect_mad_rvv
+ .type gf_5vect_mad_rvv, @function
+ 
+diff --git a/erasure_code/riscv64/gf_6vect_dot_prod_rvv.S b/erasure_code/riscv64/gf_6vect_dot_prod_rvv.S
+index eb2d7a78..7d71064d 100644
+--- a/erasure_code/riscv64/gf_6vect_dot_prod_rvv.S
++++ b/erasure_code/riscv64/gf_6vect_dot_prod_rvv.S
+@@ -31,6 +31,7 @@
+ .text
+ .align 2
+ 
++.option arch, +v
+ .global gf_6vect_dot_prod_rvv
+ .type gf_6vect_dot_prod_rvv, @function
+ 
+diff --git a/erasure_code/riscv64/gf_6vect_mad_rvv.S b/erasure_code/riscv64/gf_6vect_mad_rvv.S
+index dbe093a0..d888def7 100644
+--- a/erasure_code/riscv64/gf_6vect_mad_rvv.S
++++ b/erasure_code/riscv64/gf_6vect_mad_rvv.S
+@@ -31,6 +31,7 @@
+ .text
+ .align 2
+ 
++.option arch, +v
+ .global gf_6vect_mad_rvv
+ .type gf_6vect_mad_rvv, @function
+ 
+diff --git a/erasure_code/riscv64/gf_7vect_dot_prod_rvv.S b/erasure_code/riscv64/gf_7vect_dot_prod_rvv.S
+index bf668716..8c84535e 100644
+--- a/erasure_code/riscv64/gf_7vect_dot_prod_rvv.S
++++ b/erasure_code/riscv64/gf_7vect_dot_prod_rvv.S
+@@ -31,6 +31,7 @@
+ .text
+ .align 2
+ 
++.option arch, +v
+ .global gf_7vect_dot_prod_rvv
+ .type gf_7vect_dot_prod_rvv, @function
+ 
+diff --git a/erasure_code/riscv64/gf_vect_dot_prod_rvv.S b/erasure_code/riscv64/gf_vect_dot_prod_rvv.S
+index a4af6d7c..39f1f204 100644
+--- a/erasure_code/riscv64/gf_vect_dot_prod_rvv.S
++++ b/erasure_code/riscv64/gf_vect_dot_prod_rvv.S
+@@ -53,6 +53,7 @@
+ #   v6: z_gft1_hi (high 8 bits of GF table)
+ 
+ #if HAVE_RVV
++.option arch, +v
+ .global gf_vect_dot_prod_rvv
+ .type gf_vect_dot_prod_rvv, @function
+ 
+diff --git a/erasure_code/riscv64/gf_vect_mad_rvv.S b/erasure_code/riscv64/gf_vect_mad_rvv.S
+index bb900514..794e1480 100644
+--- a/erasure_code/riscv64/gf_vect_mad_rvv.S
++++ b/erasure_code/riscv64/gf_vect_mad_rvv.S
+@@ -31,6 +31,7 @@
+ .text
+ .align 2
+ 
++.option arch, +v
+ .global gf_vect_mad_rvv
+ .type gf_vect_mad_rvv, @function
+ 
+diff --git a/erasure_code/riscv64/gf_vect_mul_rvv.S b/erasure_code/riscv64/gf_vect_mul_rvv.S
+index aa72d1d4..36392911 100644
+--- a/erasure_code/riscv64/gf_vect_mul_rvv.S
++++ b/erasure_code/riscv64/gf_vect_mul_rvv.S
+@@ -31,6 +31,7 @@
+ .text
+ .align 2
+ 
++.option arch, +v
+ .global gf_vect_mul_rvv
+ .type gf_vect_mul_rvv, @function
+ 

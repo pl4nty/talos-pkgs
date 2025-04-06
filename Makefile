@@ -106,18 +106,14 @@ TARGETS += xz
 TARGETS += zlib
 TARGETS += zstd
 TARGETS += kernel
-TARGETS += drbd-pkg
 TARGETS += ena-pkg
 TARGETS += gasket-driver-pkg
 TARGETS += hailort-pkg
 TARGETS += mellanox-mstflint-pkg
-TARGETS += nvidia-open-gpu-kernel-modules-lts-pkg
-TARGETS += nvidia-open-gpu-kernel-modules-production-pkg
 TARGETS += tenstorrent-pkg
 TARGETS += xdma-driver-pkg
 TARGETS += zfs-pkg
-NONFREE_TARGETS = nonfree-kmod-nvidia-lts-pkg
-NONFREE_TARGETS += nonfree-kmod-nvidia-production-pkg
+NONFREE_TARGETS =
 
 # help menu
 
@@ -222,8 +218,7 @@ deps.svg:  ## Generates a dependency graph of the Pkgfile.
 	@$(BLDR) graph $(BUILD_ARGS) | dot -Tsvg -o deps.svg
 
 kernel-olddefconfig:
-	@$(MAKE) local-kernel-build TARGET_ARGS="--build-arg=KERNEL_TARGET=olddefconfig" PLATFORM=linux/amd64 DEST="kernel/build"
-	@$(MAKE) local-kernel-build TARGET_ARGS="--build-arg=KERNEL_TARGET=olddefconfig" PLATFORM=linux/arm64 DEST="kernel/build"
+	@$(MAKE) local-kernel-build TARGET_ARGS="--build-arg=KERNEL_TARGET=olddefconfig" PLATFORM=linux/riscv64 DEST="kernel/build"
 
 kernel-%:
 	for platform in $(shell echo $(PLATFORM) | tr "," " "); do \

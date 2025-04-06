@@ -11,21 +11,23 @@ steps:
         sha256: "{{ .mellanox_mstflint_sha256 }}"
         sha512: "{{ .mellanox_mstflint_sha512 }}"
     env:
-      ARCH: {{ if eq .ARCH "aarch64"}}arm64{{ else if eq .ARCH "x86_64" }}x86_64{{ else }}unsupported{{ end }}
+      ARCH: {{ if eq .ARCH "aarch64"}}arm64{{ else if eq .ARCH "x86_64" }}x86_64{{ else if eq .ARCH "riscv64" }}riscv64{{ else }}unsupported{{ end }}
+    cachePaths:
+    - /src/build
     prepare:
       - |
         tar -xzf kernel-mstflint.tgz --strip-components=1
     build:
       - |
-        make KPVER=$(cat /src/include/config/kernel.release) KSRC=/src
+        make KPVER=$(cat /src/build/include/config/kernel.release) KSRC=/src/build
     install:
       - |
-        mkdir -p /rootfs/usr/lib/modules/$(cat /src/include/config/kernel.release)/
-        cp /src/modules.order /rootfs/usr/lib/modules/$(cat /src/include/config/kernel.release)/
-        cp /src/modules.builtin /rootfs/usr/lib/modules/$(cat /src/include/config/kernel.release)/
-        cp /src/modules.builtin.modinfo /rootfs/usr/lib/modules/$(cat /src/include/config/kernel.release)/
+        mkdir -p /rootfs/usr/lib/modules/$(cat /src/build/include/config/kernel.release)/
+        cp /src/build/modules.order /rootfs/usr/lib/modules/$(cat /src/build/include/config/kernel.release)/
+        cp /src/build/modules.builtin /rootfs/usr/lib/modules/$(cat /src/build/include/config/kernel.release)/
+        cp /src/build/modules.builtin.modinfo /rootfs/usr/lib/modules/$(cat /src/build/include/config/kernel.release)/
 
-        make -C /src M=$PWD modules_install INSTALL_MOD_PATH=/rootfs/usr INSTALL_MOD_DIR=extras INSTALL_MOD_STRIP=1
+        make -C /src/build M=$PWD modules_install INSTALL_MOD_PATH=/rootfs/usr INSTALL_MOD_DIR=extras INSTALL_MOD_STRIP=1
     test:
       - |
         # https://www.kernel.org/doc/html/v4.15/admin-guide/module-signing.html#signed-modules-and-stripping

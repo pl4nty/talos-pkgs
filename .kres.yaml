@@ -64,20 +64,25 @@ spec:
     # - kernel & dependent packages (out of tree kernel modules)
     #   kernel first, then packages in alphabetical order
     - kernel
-    - drbd-pkg
+    # Fails on 6.19-rc3: drbd_transport_tcp.c and drbd_transport_lb-tcp.c expected 'struct sockaddr_unsized *' but argument is of type 'struct sockaddr *'
+    # - drbd-pkg
     - ena-pkg
     - gasket-driver-pkg
     - hailort-pkg
     - mellanox-mstflint-pkg
-    - nvidia-open-gpu-kernel-modules-lts-pkg
-    - nvidia-open-gpu-kernel-modules-production-pkg
+    # RISC-V unsupported https://github.com/NVIDIA/open-gpu-kernel-modules/pull/152
+    # - nvidia-open-gpu-kernel-modules-lts-pkg
+    # - nvidia-open-gpu-kernel-modules-production-pkg
     - tenstorrent-pkg
     - xdma-driver-pkg
+    # checking whether lookup_bdev() wants dev_t arg... configure: error: 
+    # *** None of the expected "lookup_bdev()" interfaces were detected.
     - zfs-pkg
   additionalTargets:
     nonfree:
-      - nonfree-kmod-nvidia-lts-pkg
-      - nonfree-kmod-nvidia-production-pkg
+      # RISC-V unsupported https://download.nvidia.com/XFree86/
+      # - nonfree-kmod-nvidia-lts-pkg
+      # - nonfree-kmod-nvidia-production-pkg
   reproducibleTargetName: reproducibility
 ---
 kind: auto.CustomSteps
@@ -97,8 +102,7 @@ spec:
     enabled: true
     script:
       - |
-        @$(MAKE) local-kernel-build TARGET_ARGS="--build-arg=KERNEL_TARGET=olddefconfig" PLATFORM=linux/amd64 DEST="kernel/build"
-        @$(MAKE) local-kernel-build TARGET_ARGS="--build-arg=KERNEL_TARGET=olddefconfig" PLATFORM=linux/arm64 DEST="kernel/build"
+        @$(MAKE) local-kernel-build TARGET_ARGS="--build-arg=KERNEL_TARGET=olddefconfig" PLATFORM=linux/riscv64 DEST="kernel/build"
   ghaction:
     enabled: true
     condition: on-pull-request
@@ -132,9 +136,6 @@ spec:
 kind: common.Renovate
 spec:
   packageRules:
-    - matchPackageNames:
-        - git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git
-      allowedVersions: "< 6.19"
     - matchPackageNames:
         - ipmitool/ipmitool
         - git://sourceware.org/git/lvm2.git

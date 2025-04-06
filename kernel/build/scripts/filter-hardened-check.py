@@ -51,6 +51,9 @@ IGNORE_VIOLATIONS_BY_ARCH = {
     'amd64': {
         'CONFIG_CFI_AUTO_DEFAULT', # available only with Clang, we use gcc
     },
+    'riscv64': {
+        'CONFIG_LSM_MMAP_MIN_ADDR', # wants 65536, "On arm and other archs it should not be higher than 32768": https://cateee.net/lkddb/web-lkddb/LSM_MMAP_MIN_ADDR.html
+    },
 }
 
 def main():

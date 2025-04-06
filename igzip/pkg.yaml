@@ -5,7 +5,7 @@ dependencies:
   - stage: base
 steps:
   - sources:
-      - url: https://github.com/intel/isa-l/archive/refs/tags/v{{ .igzip_version }}.tar.gz
+      - url: https://github.com/intel/isa-l/archive/{{ .igzip_version }}.tar.gz
         destination: isa-l.tar.gz
         sha256: "{{ .igzip_sha256 }}"
         sha512: "{{ .igzip_sha512 }}"
@@ -19,6 +19,7 @@ steps:
       #      https://github.com/bottlerocket-os/bottlerocket-core-kit/issues/392
       - |
         patch -p1 < /pkg/patches/pipe-buffer-sizes.patch
+        patch -p1 < /pkg/patches/non-vector-compatibility.patch
       - |
         ./autogen.sh
       - |

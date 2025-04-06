@@ -45,6 +45,7 @@ IGNORE_VIOLATIONS_BY_ARCH = {
         'CONFIG_DEFAULT_MMAP_MIN_ADDR', # looks to be a bug in the kernel-hardening-checker, the config is set in kernel config
     },
     'amd64': {},
+    'riscv64': {},
 }
 
 def main():

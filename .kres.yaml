@@ -63,15 +63,19 @@ spec:
     - ena-pkg
     - gasket-driver-pkg
     - hailort-pkg
-    - nvidia-open-gpu-kernel-modules-lts-pkg
-    - nvidia-open-gpu-kernel-modules-production-pkg
+    # RISC-V unsupported https://github.com/NVIDIA/open-gpu-kernel-modules/pull/152
+    # - nvidia-open-gpu-kernel-modules-lts-pkg
+    # - nvidia-open-gpu-kernel-modules-production-pkg
     - tenstorrent-pkg
     - xdma-driver-pkg
-    - zfs-pkg
+    # checking whether lookup_bdev() wants dev_t arg... configure: error: 
+    # *** None of the expected "lookup_bdev()" interfaces were detected.
+    # - zfs-pkg
   additionalTargets:
     nonfree:
-      - nonfree-kmod-nvidia-lts-pkg
-      - nonfree-kmod-nvidia-production-pkg
+      # RISC-V unsupported https://download.nvidia.com/XFree86/
+      # - nonfree-kmod-nvidia-lts-pkg
+      # - nonfree-kmod-nvidia-production-pkg
   reproducibleTargetName: reproducibility
 ---
 kind: auto.CustomSteps
@@ -89,8 +93,7 @@ spec:
     enabled: true
     script:
       - |
-        @$(MAKE) local-kernel-build TARGET_ARGS="--build-arg=KERNEL_TARGET=olddefconfig" PLATFORM=linux/amd64 DEST="kernel/build"
-        @$(MAKE) local-kernel-build TARGET_ARGS="--build-arg=KERNEL_TARGET=olddefconfig" PLATFORM=linux/arm64 DEST="kernel/build"
+        @$(MAKE) local-kernel-build TARGET_ARGS="--build-arg=KERNEL_TARGET=olddefconfig" PLATFORM=linux/riscv64 DEST="kernel/build"
 ---
 kind: custom.Step
 name: kernel-%

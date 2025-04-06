@@ -1,6 +1,6 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED, PLEASE DO NOT EDIT.
 #
-# Generated on 2025-09-05T14:04:09Z by kres cc45611.
+# Generated on 2025-09-14T10:26:17Z by kres d1c95db.
 
 # common variables
 
@@ -103,13 +103,9 @@ TARGETS += drbd-pkg
 TARGETS += ena-pkg
 TARGETS += gasket-driver-pkg
 TARGETS += hailort-pkg
-TARGETS += nvidia-open-gpu-kernel-modules-lts-pkg
-TARGETS += nvidia-open-gpu-kernel-modules-production-pkg
 TARGETS += tenstorrent-pkg
 TARGETS += xdma-driver-pkg
-TARGETS += zfs-pkg
-NONFREE_TARGETS = nonfree-kmod-nvidia-lts-pkg
-NONFREE_TARGETS += nonfree-kmod-nvidia-production-pkg
+NONFREE_TARGETS =
 
 # help menu
 
@@ -202,8 +198,7 @@ deps.svg:  ## Generates a dependency graph of the Pkgfile.
 	@$(BLDR) graph $(BUILD_ARGS) | dot -Tsvg -o deps.svg
 
 kernel-olddefconfig:
-	@$(MAKE) local-kernel-build TARGET_ARGS="--build-arg=KERNEL_TARGET=olddefconfig" PLATFORM=linux/amd64 DEST="kernel/build"
-	@$(MAKE) local-kernel-build TARGET_ARGS="--build-arg=KERNEL_TARGET=olddefconfig" PLATFORM=linux/arm64 DEST="kernel/build"
+	@$(MAKE) local-kernel-build TARGET_ARGS="--build-arg=KERNEL_TARGET=olddefconfig" PLATFORM=linux/riscv64 DEST="kernel/build"
 
 kernel-%:
 	for platform in $(shell echo $(PLATFORM) | tr "," " "); do \

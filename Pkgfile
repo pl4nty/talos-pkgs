@@ -1,11 +1,11 @@
-# syntax = ghcr.io/siderolabs/bldr:v0.5.3
+# syntax = ghcr.io/pl4nty/bldr:v0.5.3-1-ge009d97
 
 format: v1alpha2
 
 vars:
-  TOOLCHAIN_MUSL_IMAGE: ghcr.io/siderolabs/toolchain-musl:v1.12.0-alpha.0-4-g00e3d96
-  TOOLS_PREFIX: ghcr.io/siderolabs/
-  TOOLS_REV: v1.12.0-alpha.0-6-gc37ac80
+  TOOLCHAIN_MUSL_IMAGE: ghcr.io/pl4nty/toolchain-musl:v1.12.0-alpha.0-5-ge62c577
+  TOOLS_PREFIX: ghcr.io/pl4nty/
+  TOOLS_REV: v1.12.0-alpha.0-7-g4a9b676
 
   # renovate: datasource=github-releases depName=containernetworking/plugins
   cni_version: v1.8.0
@@ -91,6 +91,7 @@ vars:
   kspp_sha256: 0f731380ede2aaf70da5e4ba6be7f55c3442d25e94caa9e7a8666a04b306ff15
   kspp_sha512: ef115e8b41526b4a248dab97daaeec85561525e4abf046799154242dcb2ebe6b37203fe0491e01b301f1948faa5b102f85c732ee503e0b999e7d4d162998fc70
 
+  # 6.13+ for KASAN https://patchwork.kernel.org/project/linux-riscv/patch/20241126143250.29708-1-palmer@rivosinc.com/
   # renovate: datasource=git-tags extractVersion=^v(?<version>.*)$ depName=git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git
   linux_version: 6.16.6
   linux_sha256: 48b57b1e2e2166fb601a0e035d2fb6396e295d9245f0dfd6883d7c0c838b3002

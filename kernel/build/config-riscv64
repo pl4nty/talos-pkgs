@@ -318,7 +318,7 @@ CONFIG_ARCH_RENESAS=y
 # CONFIG_SOC_SIFIVE is not set
 # CONFIG_SOC_STARFIVE is not set
 CONFIG_ARCH_SUNXI=y
-# CONFIG_ARCH_THEAD is not set
+CONFIG_ARCH_THEAD=y
 # CONFIG_SOC_VIRT is not set
 # end of SoC selection
 

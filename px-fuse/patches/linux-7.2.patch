@@ -1,0 +1,163 @@
+Subject: [PATCH] Linux 7.2 compatibility
+
+Three unrelated build failures against Linux 7.2:
+
+ * strncpy() was removed from <linux/string.h>, so the calls in pxd.c and
+   pxd_fastpath.c became implicit declarations. strscpy() always NUL
+   terminates; the destination sizes are adjusted so the usable capacity is
+   unchanged.
+
+ * inode->i_ino became u64, so the "%lu" printks in pxd_fastpath.c are now
+   -Wformat errors. Cast to unsigned long long and use "%llu" so the format
+   is correct on kernels either side of the change.
+
+ * clang inlines all eleven fuse_notify_*() handlers into fuse_notify() and
+   on up into fuse_dev_write_iter(), summing a ~384 byte pxd_add_*_out from
+   each into a 4192 byte frame and tripping -Wframe-larger-than=2048. Mark
+   the handlers noinline; only one handler's frame is live at a time, so
+   this reduces real stack use as well as satisfying the check.
+--- a/dev.c
++++ b/dev.c
+@@ -526,7 +526,7 @@
+ 	return -EINVAL;
+ }
+ 
+-static int fuse_notify_add(struct fuse_conn *conn, unsigned int size,
++static noinline int fuse_notify_add(struct fuse_conn *conn, unsigned int size,
+ 		struct iov_iter *iter)
+ {
+ 	struct pxd_add_out add_old;
+@@ -552,7 +552,7 @@
+ 	return pxd_add(conn, &add);
+ }
+ 
+-static int fuse_notify_add_ext(struct fuse_conn *conn, unsigned int size,
++static noinline int fuse_notify_add_ext(struct fuse_conn *conn, unsigned int size,
+ 		struct iov_iter *iter)
+ {
+ 	struct pxd_add_ext_out add_v1;
+@@ -581,7 +581,7 @@
+ 	return pxd_add(conn, &add);
+ }
+ 
+-static int fuse_notify_add_ext_v2(struct fuse_conn *conn, unsigned int size,
++static noinline int fuse_notify_add_ext_v2(struct fuse_conn *conn, unsigned int size,
+ 		struct iov_iter *iter)
+ {
+ 	struct pxd_add_v2_out add;
+@@ -746,7 +746,7 @@
+ 	return 0;
+ }
+ 
+-static int fuse_notify_read_data(struct fuse_conn *conn, unsigned int size,
++static noinline int fuse_notify_read_data(struct fuse_conn *conn, unsigned int size,
+ 				struct iov_iter *iter)
+ {
+ 	struct pxd_read_data_out read_data;
+@@ -778,7 +778,7 @@
+ }
+ 
+ 
+-static int fuse_notify_remove(struct fuse_conn *conn, unsigned int size,
++static noinline int fuse_notify_remove(struct fuse_conn *conn, unsigned int size,
+ 		struct iov_iter *iter)
+ {
+ 	struct pxd_remove_out remove;
+@@ -791,7 +791,7 @@
+ 	return pxd_remove(conn, &remove);
+ }
+ 
+-static int fuse_notify_update_size(struct fuse_conn *conn, unsigned int size,
++static noinline int fuse_notify_update_size(struct fuse_conn *conn, unsigned int size,
+ 		struct iov_iter *iter)
+ {
+ 	struct pxd_update_size update_size;
+@@ -804,13 +804,13 @@
+ 	return pxd_update_size(conn, &update_size);
+ }
+ 
+-static int fuse_notify_get_features(struct fuse_conn *conn, unsigned int size,
++static noinline int fuse_notify_get_features(struct fuse_conn *conn, unsigned int size,
+ 		struct iov_iter *iter)
+ {
+ 	return pxd_supported_features();
+ }
+ 
+-static int fuse_notify_suspend(struct fuse_conn *conn, unsigned int size,
++static noinline int fuse_notify_suspend(struct fuse_conn *conn, unsigned int size,
+ 		struct iov_iter *iter) {
+ 	struct pxd_context *ctx = container_of(conn, struct pxd_context, fc);
+ 	struct pxd_suspend req;
+@@ -830,7 +830,7 @@
+ 	return pxd_request_suspend(pxd_dev, req.skip_flush, req.coe);
+ }
+ 
+-static int fuse_notify_resume(struct fuse_conn *conn, unsigned int size,
++static noinline int fuse_notify_resume(struct fuse_conn *conn, unsigned int size,
+ 		struct iov_iter *iter) {
+ 	struct pxd_context *ctx = container_of(conn, struct pxd_context, fc);
+ 	struct pxd_resume req;
+@@ -851,7 +851,7 @@
+ 	return pxd_request_resume(pxd_dev);
+ }
+ 
+-static int fuse_notify_ioswitch_event(struct fuse_conn *conn, unsigned int size,
++static noinline int fuse_notify_ioswitch_event(struct fuse_conn *conn, unsigned int size,
+                struct iov_iter *iter, bool failover) {
+        struct pxd_context *ctx = container_of(conn, struct pxd_context, fc);
+        struct pxd_ioswitch req;
+@@ -873,7 +873,7 @@
+                 failover ? PXD_FAILOVER_TO_USERSPACE : PXD_FALLBACK_TO_KERNEL);
+ }
+ 
+-static int fuse_notify_export(struct fuse_conn *conn, unsigned int size,
++static noinline int fuse_notify_export(struct fuse_conn *conn, unsigned int size,
+ 		struct iov_iter *iter)
+ {
+ 	uint64_t dev_id;
+--- a/pxd.c
++++ b/pxd.c
+@@ -188,7 +188,7 @@
+ 		if (sizeof(ver_data) < ver_len) {
+ 			ver_len = sizeof(ver_data);
+ 		}
+-		strncpy(ver_data, gitversion, ver_len);
++		strscpy(ver_data, gitversion, ver_len);
+ 		ver_data[ver_len-1]='\0';
+ 		if (copy_to_user(argp +
+ 				 offsetof(struct pxd_ioctl_version_args, piv_len),
+--- a/pxd_fastpath.c
++++ b/pxd_fastpath.c
+@@ -544,16 +544,16 @@
+ 		fp->file[i] = f;
+ 
+ 		inode = file_inode(f);
+-		printk(KERN_INFO"device %lld:%d, inode %lu mode %#x\n", pxd_dev->dev_id, i, inode->i_ino, mode);
++		printk(KERN_INFO"device %lld:%d, inode %llu mode %#x\n", pxd_dev->dev_id, i, (unsigned long long)inode->i_ino, mode);
+ 		if (S_ISREG(inode->i_mode)) {
+-			printk(KERN_INFO"device[%lld:%d] is a regular file - inode %lu\n",
+-					pxd_dev->dev_id, i, inode->i_ino);
++			printk(KERN_INFO"device[%lld:%d] is a regular file - inode %llu\n",
++					pxd_dev->dev_id, i, (unsigned long long)inode->i_ino);
+ 		} else if (S_ISBLK(inode->i_mode)) {
+-			printk(KERN_INFO"device[%lld:%d] is a block device - inode %lu\n",
+-				pxd_dev->dev_id, i, inode->i_ino);
++			printk(KERN_INFO"device[%lld:%d] is a block device - inode %llu\n",
++				pxd_dev->dev_id, i, (unsigned long long)inode->i_ino);
+ 		} else {
+-			printk(KERN_INFO"device[%lld:%d] inode %lu unknown device %#x\n",
+-				pxd_dev->dev_id, i, inode->i_ino, inode->i_mode);
++			printk(KERN_INFO"device[%lld:%d] inode %llu unknown device %#x\n",
++				pxd_dev->dev_id, i, (unsigned long long)inode->i_ino, inode->i_mode);
+ 			goto out_file_failed;
+ 		}
+ 	}
+@@ -713,7 +713,7 @@
+ 	for (i = 0; i < update_path->count; i++) {
+ 		pxd_printk("Fastpath %d(%d): %s, current %s, %px\n", i, pxd_dev->fp.nfd,
+ 			update_path->devpath[i], pxd_dev->fp.device_path[i], pxd_dev->fp.file[i]);
+-		strncpy(pxd_dev->fp.device_path[i], update_path->devpath[i], MAX_PXD_DEVPATH_LEN);
++		strscpy(pxd_dev->fp.device_path[i], update_path->devpath[i], MAX_PXD_DEVPATH_LEN + 1);
+ 		pxd_dev->fp.device_path[i][MAX_PXD_DEVPATH_LEN] = '\0';
+ 		pxd_printk("dev %llu: successfully installed fastpath %s\n",
+ 			pxd_dev->dev_id, pxd_dev->fp.device_path[i]);

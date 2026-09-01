@@ -37,40 +37,41 @@ ARG TOOLS_IMG=scratch
 FROM ${LLVM_IMG} AS llvm
 FROM ${TOOLS_IMG} AS tools
 
-FROM docker.io/library/fedora:42 AS gen
+FROM docker.io/library/debian:13 AS gen
 ENV LC_ALL=C \
     LANG=C \
     SPAAS=false \
     PATH=/opt/llvm/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin
 
-# musl-libc gives us /lib/ld-musl-*.so.1 (the dynamic linker that the
+# musl gives us /lib/ld-musl-*.so.1 (the dynamic linker that the
 # siderolabs/llvm clang is built against, not glibc); the rest is the
 # tooling needed to actually run the kernel build + drbd compat generation.
-RUN dnf install -y --setopt=install_weak_deps=False \
+RUN export DEBIAN_FRONTEND=noninteractive; \
+    apt-get update \
+    && apt-get install -y --no-install-recommends \
         coccinelle \
         gcc \
         make \
         patch \
-        perl-interpreter \
+        perl \
         diffutils \
-        elfutils-libelf-devel \
-        openssl-devel \
+        libelf-dev \
+        libssl-dev \
         bc \
         bison \
         flex \
         cpio \
         rsync \
         curl \
+        ca-certificates \
         bash \
-        glibc-headers \
-        glibc-devel \
+        libc6-dev \
         kmod \
-        musl-libc \
+        musl \
         findutils \
         which \
-        xz \
-    && dnf clean all \
-    && rm -rf /var/cache/dnf
+        xz-utils \
+    && rm -rf /var/lib/apt/lists/*
 
 # LLVM toolchain (musl-linked clang/lld) plus its support libraries — the
 # kernel was built with this exact clang and records flags only it understands.
@@ -115,11 +116,11 @@ RUN --mount=from=kernel-build,target=/kernel-build,type=bind \
 ENV LLVM=1
 RUN set -e; \
     cd /src; \
-    arch_kbuild=$(case "${TARGETARCH}" in amd64) echo x86_64 ;; arm64) echo arm64 ;; esac); \
+    arch_kbuild=$(case "${TARGETARCH}" in amd64) echo x86_64 ;; arm64) echo arm64 ;; riscv64) echo riscv ;; esac); \
     test -n "${arch_kbuild}"; \
     echo "ARCH=${arch_kbuild} LLVM=1 modules_prepare"; \
-    make -j"$(nproc)" "ARCH=${arch_kbuild}" olddefconfig; \
-    make -j"$(nproc)" "ARCH=${arch_kbuild}" modules_prepare
+    make -j"$(nproc)" "ARCH=${arch_kbuild}" HOSTCC=gcc HOSTLD=ld olddefconfig; \
+    make -j"$(nproc)" "ARCH=${arch_kbuild}" HOSTCC=gcc HOSTLD=ld modules_prepare
 
 # Download DRBD and run the compat patch generation. `make prep` runs Kbuild
 # only far enough to invoke Makefile.spatch (which calls spatch locally,

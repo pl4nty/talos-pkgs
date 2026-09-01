@@ -7,7 +7,8 @@
 # Usage:
 #   ARCH=amd64 hack/drbd-gen-compat.sh        # default
 #   ARCH=arm64 hack/drbd-gen-compat.sh
-#   ARCH=both  hack/drbd-gen-compat.sh        # both architectures
+#   ARCH=riscv64 hack/drbd-gen-compat.sh
+#   ARCH=all   hack/drbd-gen-compat.sh        # all architectures
 #
 # The Dockerfile prepares the kernel source itself (downloads the tarball,
 # applies kernel/build/patches/, runs `make modules_prepare`) so we don't
@@ -19,8 +20,8 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 ARCHES="${ARCH:-amd64}"
-if [ "${ARCHES}" = "both" ]; then
-    ARCHES="amd64 arm64"
+if [ "${ARCHES}" = "all" ]; then
+    ARCHES="amd64 arm64 riscv64"
 fi
 
 read_var() {
@@ -51,8 +52,8 @@ echo "    Tools image: ${TOOLS_IMG}"
 
 for arch in ${ARCHES}; do
     case "${arch}" in
-        amd64|arm64) ;;
-        *) echo "ERROR: unsupported arch '${arch}' (expected amd64 or arm64)" >&2; exit 1;;
+        amd64|arm64|riscv64) ;;
+        *) echo "ERROR: unsupported arch '${arch}' (expected amd64, arm64 or riscv64)" >&2; exit 1;;
     esac
 
     out_dir="drbd/cocci-cache/${arch}"

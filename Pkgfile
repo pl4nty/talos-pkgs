@@ -1,13 +1,13 @@
-# syntax = ghcr.io/siderolabs/bldr:v0.6.4
+# syntax = ghcr.io/pl4nty/bldr:46754be
 
 format: v1alpha2
 
 vars:
-  TOOLCHAIN_MUSL_IMAGE: ghcr.io/siderolabs/toolchain-musl:v1.15.0-alpha.0-7-g078a2d6
-  TOOLS_PREFIX: ghcr.io/siderolabs/
-  TOOLS_REV: v1.15.0-alpha.0-10-gd40b203
-  LLVM_IMAGE: ghcr.io/siderolabs/llvm
-  RUSTC_IMAGE: ghcr.io/siderolabs/rustc:v1.15.0-alpha.0-1-g95a2514
+  TOOLCHAIN_MUSL_IMAGE: ghcr.io/pl4nty/toolchain-musl:31b7fb5
+  TOOLS_PREFIX: ghcr.io/pl4nty/
+  TOOLS_REV: afd1ca6
+  LLVM_IMAGE: ghcr.io/pl4nty/llvm
+  RUSTC_IMAGE: ghcr.io/pl4nty/rustc:b85f348
 
   # renovate: datasource=github-releases depName=containernetworking/plugins
   cni_version: v1.9.1
@@ -103,10 +103,12 @@ vars:
   kspp_sha256: 90f9f8b74247607651f2a501e914f594567f269255b5048e92effa9b7b4ff3c1
   kspp_sha512: 55f35ce46a0d44746780b9e47fef0d6383096ef519686022afdfdaae571a7d8749c02f45a0c6e9f07c36a4e8f51dc05b4e49131354eab8c892fc2690274face4
 
+  # CONFIG_MMC_SDHCI_OF_DWCMSHC and CONFIG_DW_AXI_DMAC=y not m to troubleshoot DMA issues
+  # extractVersion=^next-(?<version>.*)$ depName=git://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
   # renovate: datasource=git-tags extractVersion=^v(?<version>.*)$ depName=git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git
-  linux_version: 6.18.53
-  linux_sha256: 4d6fba95c2244b08a7b4144a4d38b9be4fb31abb5e7682ae40bb5cb11374cfe0
-  linux_sha512: 32a6bf142a85bdcd2467a80c0f00666096d59f23ee7fc073afe564e216442ff9905da4361a04bb00ca962d2d636f37d5347e791bc90fc92fe839eb009111096f
+  linux_version: 7.2.8
+  linux_sha256: 12e8d5a973d1ad7c5a5c69882e4022b131ed715db7003fdcd760ddf8c3e51941
+  linux_sha512: f5d9e366f026dba2853f48ea81d3a0cd9ecad1462aba52fbc160c5cdd3a3c657f0f008e1dd07ddfb0a05047421223ef6c1da8e43d47c85f11c71b6bd30ce0213
 
   # renovate: datasource=git-tags extractVersion=^libaio-(?<version>.*)$ depName=https://pagure.io/libaio.git
   libaio_version: 0.3.113

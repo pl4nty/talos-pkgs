@@ -52,6 +52,11 @@ IGNORE_VIOLATIONS_BY_ARCH = {
     'amd64': {
         'CONFIG_CFI_AUTO_DEFAULT', # Disabled due to issues with GPL-incompatible modules
     },
+    'riscv64': {
+        'CONFIG_LSM_MMAP_MIN_ADDR', # on riscv64, this can be set only to 32768: https://cateee.net/lkddb/web-lkddb/LSM_MMAP_MIN_ADDR.html
+        'CONFIG_RANDOM_KMALLOC_CACHES', # superseded by CONFIG_KMALLOC_PARTITION_CACHES
+        'CONFIG_ZERO_CALL_USED_REGS', # depends on disabled CONFIG_CC_HAS_ZERO_CALL_USED_REGS
+    },
 }
 
 def main():

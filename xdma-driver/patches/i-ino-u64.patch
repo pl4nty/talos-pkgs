@@ -1,0 +1,40 @@
+Subject: [PATCH] Fix inode->i_ino format specifiers for Linux 7.2
+
+inode->i_ino became u64 in Linux 7.2, so printing it with "%lx" is a
+-Wformat error under -Werror. Cast to unsigned long long and use "%llx"
+so the format stays correct on kernels either side of the change.
+--- a/XDMA/linux-kernel/xdma/xdma_cdev.c
++++ b/XDMA/linux-kernel/xdma/xdma_cdev.c
+@@ -167,8 +167,8 @@
+ 	/* pointer to containing structure of the character device inode */
+ 	xcdev = container_of(inode->i_cdev, struct xdma_cdev, cdev);
+ 	if (xcdev->magic != MAGIC_CHAR) {
+-		pr_err("xcdev 0x%p inode 0x%lx magic mismatch 0x%lx\n",
+-			xcdev, inode->i_ino, xcdev->magic);
++		pr_err("xcdev 0x%p inode 0x%llx magic mismatch 0x%lx\n",
++			xcdev, (unsigned long long)inode->i_ino, xcdev->magic);
+ 		return -EINVAL;
+ 	}
+ 	/* create a reference to our char device in the opened file */
+@@ -186,8 +186,8 @@
+ 	struct xdma_cdev *xcdev = (struct xdma_cdev *)file->private_data;
+ 
+ 	if (!xcdev) {
+-		pr_err("char device with inode 0x%lx xcdev NULL\n",
+-			inode->i_ino);
++		pr_err("char device with inode 0x%llx xcdev NULL\n",
++			(unsigned long long)inode->i_ino);
+ 		return -EINVAL;
+ 	}
+ 
+@@ -200,8 +200,8 @@
+ 	/* fetch device specific data stored earlier during open */
+ 	xdev = xcdev->xdev;
+ 	if (!xdev) {
+-		pr_err("char device with inode 0x%lx xdev NULL\n",
+-			inode->i_ino);
++		pr_err("char device with inode 0x%llx xdev NULL\n",
++			(unsigned long long)inode->i_ino);
+ 		return -EINVAL;
+ 	}
+ 

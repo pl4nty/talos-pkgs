@@ -12,8 +12,10 @@ steps:
         sha256: "{{ .gasket_driver_sha256 }}"
         sha512: "{{ .gasket_driver_sha512 }}"
     env:
-      ARCH: {{ if eq .ARCH "aarch64"}}arm64{{ else if eq .ARCH "x86_64" }}x86_64{{ else }}unsupported{{ end }}
+      ARCH: {{ if eq .ARCH "aarch64"}}arm64{{ else if eq .ARCH "x86_64" }}x86_64{{ else if eq .ARCH "riscv64" }}riscv{{ else }}unsupported{{ end }}
       LLVM: 1
+    cachePaths:
+      - /src/build
     prepare:
       - |
         tar xf gasket-driver.tar.gz --strip-components=1
@@ -22,20 +24,22 @@ steps:
         patch -p1 </pkg/patches/no-llseek.patch
         # Linux 6.13+ support: https://github.com/google/gasket-driver/pull/40
         patch -p1 </pkg/patches/module-import-ns.patch
+        # Linux 7.1 renamed zap_vma_ptes() to zap_special_vma_range()
+        patch -p1 </pkg/patches/zap-special-vma-range.patch
     build:
       - |
         cd src
-        sed -i 's|/lib/modules/$(KVERSION)/build|/src|' ./Makefile
+        sed -i 's|/lib/modules/$(KVERSION)/build|/src/build|' ./Makefile
         make all
 
     install:
       - |
-        mkdir -p /rootfs/usr/lib/modules/$(cat /src/include/config/kernel.release)/
-        cp /src/modules.order /rootfs/usr/lib/modules/$(cat /src/include/config/kernel.release)/
-        cp /src/modules.builtin /rootfs/usr/lib/modules/$(cat /src/include/config/kernel.release)/
-        cp /src/modules.builtin.modinfo /rootfs/usr/lib/modules/$(cat /src/include/config/kernel.release)/
+        mkdir -p /rootfs/usr/lib/modules/$(cat /src/build/include/config/kernel.release)/
+        cp /src/build/modules.order /rootfs/usr/lib/modules/$(cat /src/build/include/config/kernel.release)/
+        cp /src/build/modules.builtin /rootfs/usr/lib/modules/$(cat /src/build/include/config/kernel.release)/
+        cp /src/build/modules.builtin.modinfo /rootfs/usr/lib/modules/$(cat /src/build/include/config/kernel.release)/
 
-        make -C /src M=$(pwd)/src modules_install INSTALL_MOD_PATH=/rootfs/usr INSTALL_MOD_DIR=extras INSTALL_MOD_STRIP=1
+        make -C /src/build M=$(pwd)/src modules_install INSTALL_MOD_PATH=/rootfs/usr INSTALL_MOD_DIR=extras INSTALL_MOD_STRIP=1 CONFIG_MODULE_SIG_KEY=/src/build/certs/signing_key.pem
     test:
       - |
         # https://www.kernel.org/doc/html/v4.15/admin-guide/module-signing.html#signed-modules-and-stripping

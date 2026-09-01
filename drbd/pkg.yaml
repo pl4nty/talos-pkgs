@@ -12,8 +12,10 @@ steps:
         sha256: "{{ .drbd_sha256 }}"
         sha512: "{{ .drbd_sha512 }}"
     env:
-      ARCH: {{ if eq .ARCH "aarch64"}}arm64{{ else if eq .ARCH "x86_64" }}x86_64{{ else }}unsupported{{ end }}
+      ARCH: {{ if eq .ARCH "aarch64"}}arm64{{ else if eq .ARCH "x86_64" }}x86_64{{ else if eq .ARCH "riscv64" }}riscv{{ else }}unsupported{{ end }}
       LLVM: 1
+    cachePaths:
+      - /src/build
     prepare:
       - |
         tar -xzf drbd.tar.gz --strip-components=1
@@ -21,31 +23,35 @@ steps:
         # Inject the pre-generated compat patches into DRBD's cocci_cache so
         # the kernel build does not need to run spatch or contact SPAAS.
         # The cache entries are generated out of band by hack/drbd-gen-compat.sh.
-        cocci_src=/pkg/cocci-cache/{{ if eq .ARCH "aarch64"}}arm64{{ else if eq .ARCH "x86_64" }}amd64{{ else }}unsupported{{ end }}
+        cocci_src=/pkg/cocci-cache/{{ if eq .ARCH "aarch64"}}arm64{{ else if eq .ARCH "x86_64" }}amd64{{ else if eq .ARCH "riscv64" }}riscv64{{ else }}unsupported{{ end }}
         if [ ! -d "${cocci_src}" ] || [ -z "$(ls -A "${cocci_src}" 2>/dev/null)" ]; then
             echo "ERROR: no pre-generated cocci cache found at ${cocci_src}." >&2
-            echo "       Run 'hack/drbd-gen-compat.sh' (ARCH=amd64|arm64|both) and commit the results." >&2
+            echo "       Run 'hack/drbd-gen-compat.sh' (ARCH=amd64|arm64|riscv64|all) and commit the results." >&2
             exit 1
         fi
         mkdir -p drbd/drbd-kernel-compat/cocci_cache/
         cp -r "${cocci_src}"/* drbd/drbd-kernel-compat/cocci_cache/
   - network: none
     env:
-      ARCH: {{ if eq .ARCH "aarch64"}}arm64{{ else if eq .ARCH "x86_64" }}x86_64{{ else }}unsupported{{ end }}
+      ARCH: {{ if eq .ARCH "aarch64"}}arm64{{ else if eq .ARCH "x86_64" }}x86_64{{ else if eq .ARCH "riscv64" }}riscv{{ else }}unsupported{{ end }}
       LLVM: 1
       SPAAS: "false"
+    cachePaths:
+      - /src/build
     build:
       - |
-        make -j $(nproc) -C drbd KERNEL_SOURCES=/src MODVERSIONS=detect KDIR=/src
+        make -j $(nproc) -C drbd KERNEL_SOURCES=/src MODVERSIONS=detect KDIR=/src/build
   - network: none
+    cachePaths:
+      - /src/build
     install:
       - |
-        mkdir -p /rootfs/usr/lib/modules/$(cat /src/include/config/kernel.release)/
-        cp /src/modules.order /rootfs/usr/lib/modules/$(cat /src/include/config/kernel.release)/
-        cp /src/modules.builtin /rootfs/usr/lib/modules/$(cat /src/include/config/kernel.release)/
-        cp /src/modules.builtin.modinfo /rootfs/usr/lib/modules/$(cat /src/include/config/kernel.release)/
+        mkdir -p /rootfs/usr/lib/modules/$(cat /src/build/include/config/kernel.release)/
+        cp /src/build/modules.order /rootfs/usr/lib/modules/$(cat /src/build/include/config/kernel.release)/
+        cp /src/build/modules.builtin /rootfs/usr/lib/modules/$(cat /src/build/include/config/kernel.release)/
+        cp /src/build/modules.builtin.modinfo /rootfs/usr/lib/modules/$(cat /src/build/include/config/kernel.release)/
 
-        make -C /src M=$(pwd)/drbd/build-current modules_install DESTDIR=/rootfs INSTALL_MOD_PATH=/rootfs/usr INSTALL_MOD_DIR=extras INSTALL_MOD_STRIP=1 CONFIG_MODULE_SIG_ALL=y
+        make -C /src/build M=$(pwd)/drbd/build-current modules_install DESTDIR=/rootfs INSTALL_MOD_PATH=/rootfs/usr INSTALL_MOD_DIR=extras INSTALL_MOD_STRIP=1 CONFIG_MODULE_SIG_ALL=y CONFIG_MODULE_SIG_KEY=/src/build/certs/signing_key.pem
     test:
       - |
         # https://www.kernel.org/doc/html/v4.15/admin-guide/module-signing.html#signed-modules-and-stripping

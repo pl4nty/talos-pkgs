@@ -11,11 +11,17 @@ steps:
         destination: libisoburn.tar.gz
         sha256: "{{ .libisoburn_sha256 }}"
         sha512: "{{ .libisoburn_sha512 }}"
+      - url: https://gitweb.git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=41093876ef6ea2a9640abf7344954181478bd5ae
+        destination: config.sub.new
+        sha256: 26b852f75a637448360a956931439f7e818bf63150eaadb9b85484347628d1fd
+        sha512: dad55c53a201de050522ed47073a6318599e15312d79eef44e1de5f82288a9bd1550c909e08752d43dd2fe442782187987e12aa565bbad70fc1b82180b49ac67
     prepare:
       - |
         tar -xzf libisoburn.tar.gz --strip-components=1
+        mv config.sub.new config.sub
 
         ./configure \
+            --build=${BUILD} \
             --prefix=/usr
     build:
       - |

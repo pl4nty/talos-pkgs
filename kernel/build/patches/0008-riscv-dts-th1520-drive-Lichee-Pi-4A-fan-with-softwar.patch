@@ -1,0 +1,49 @@
+From: Tom Plant <tom@tplant.com.au>
+Subject: [PATCH] riscv: dts: th1520: drive Lichee Pi 4A fan with software PWM
+
+The hardware PWM driver (CONFIG_PWM_TH1520) depends on Rust, which we don't
+build. Drive GPIO3_3 with software PWM instead and drop the fan_pins group,
+which would mux the pin away from the GPIO controller. The period widens to
+100ms because pwm-gpio bit-bangs from an hrtimer.
+
+--- a/arch/riscv/boot/dts/thead/th1520-lichee-pi-4a.dts
++++ b/arch/riscv/boot/dts/thead/th1520-lichee-pi-4a.dts
+@@ -92,12 +92,16 @@
+ 		};
+ 	};
+ 
++	gpio_pwm: gpio-pwm {
++		compatible = "pwm-gpio";
++		#pwm-cells = <3>;
++		gpios = <&gpio3 3 GPIO_ACTIVE_HIGH>;
++	};
++
+ 	fan: pwm-fan {
+-		pinctrl-names = "default";
+-		pinctrl-0 = <&fan_pins>;
+ 		compatible = "pwm-fan";
+ 		#cooling-cells = <2>;
+-		pwms = <&pwm 1 10000000 0>;
++		pwms = <&gpio_pwm 0 100000000 0>;
+ 		cooling-levels = <0 66 196 255>;
+ 	};
+ 
+@@ -118,18 +122,6 @@
+ };
+ 
+ &padctrl0_apsys {
+-	fan_pins: fan-0 {
+-		pwm1-pins {
+-			pins = "GPIO3_3"; /* PWM1 */
+-			function = "pwm";
+-			bias-disable;
+-			drive-strength = <25>;
+-			input-disable;
+-			input-schmitt-disable;
+-			slew-rate = <0>;
+-		};
+-	};
+-
+ 	uart0_pins: uart0-0 {
+ 		tx-pins {
+ 			pins = "UART0_TXD";

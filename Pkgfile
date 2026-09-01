@@ -1,13 +1,13 @@
-# syntax = ghcr.io/siderolabs/bldr:v0.6.3
+# syntax = ghcr.io/pl4nty/bldr:46754be
 
 format: v1alpha2
 
 vars:
-  TOOLCHAIN_MUSL_IMAGE: ghcr.io/siderolabs/toolchain-musl:v1.15.0-alpha.0-3-g2f1a147
-  TOOLS_PREFIX: ghcr.io/siderolabs/
-  TOOLS_REV: v1.15.0-alpha.0-4-g35fab51
-  LLVM_IMAGE: ghcr.io/siderolabs/llvm
-  RUSTC_IMAGE: ghcr.io/siderolabs/rustc:v1.15.0-alpha.0
+  TOOLCHAIN_MUSL_IMAGE: ghcr.io/pl4nty/toolchain-musl:31b7fb5
+  TOOLS_PREFIX: ghcr.io/pl4nty/
+  TOOLS_REV: afd1ca6
+  LLVM_IMAGE: ghcr.io/pl4nty/llvm
+  RUSTC_IMAGE: ghcr.io/pl4nty/rustc:b85f348
 
   # renovate: datasource=github-releases depName=containernetworking/plugins
   cni_version: v1.9.1
@@ -46,9 +46,9 @@ vars:
   e2fsprogs_sha512: 923c1ba52cf48557e190ee936be47ff3e43e4798950499e3c663f0f077470caefbb69ee845ebe1f969b3e7c1bb0c22e507188f1daca24649c54c5843c835b2f9
 
   # renovate: datasource=github-releases extractVersion=^ena_linux_(?<version>.*)$ depName=amzn/amzn-drivers
-  ena_version: 2.17.2
-  ena_sha256: bda1caa39324f2b0af94694a3d48b90c81ddefbe0bdcdf2e87491e0b4225bdc9
-  ena_sha512: e6e14de0308a592b6bac472e5d790abb1b0d857326d734a0dc586a3a983bb239eb1488928cacb6fa7b45233b333b61cb18389d560aaac8960ddebab07cd122a6
+  ena_version: 2.17.3
+  ena_sha256: 6df53099b206a2071da6abc4a4e941793f905081de5f0de9e8a79876f2a2bb18
+  ena_sha512: c1b7ab655581dc139614fd4b0e7a9d72ede192b4cd1ad5d9711c3726491bf5a7302434757bfc3bc79100ce73ad184b7a68e51e3d516171635a99570be68afa5b
 
   # renovate: datasource=github-releases extractVersion=^v(?<version>.*)$ depName=systemd/systemd
   systemd_version: 261.2
@@ -103,10 +103,12 @@ vars:
   kspp_sha256: 0dc61ebf01f0dd1d0d2204432235fb2470bcf2ec020172c30a9d1c14f103f032
   kspp_sha512: 2b40c41ed0347a339053aef61c838b5131dd583fb0d1ac8f3361040361ba868724ad16dfdc13023ff2b0f51f32c0aba605316d5d76f9fc6c1d50d90b4ceedead
 
+  # CONFIG_MMC_SDHCI_OF_DWCMSHC and CONFIG_DW_AXI_DMAC=y not m to troubleshoot DMA issues
+  # extractVersion=^next-(?<version>.*)$ depName=git://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
   # renovate: datasource=git-tags extractVersion=^v(?<version>.*)$ depName=git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git
-  linux_version: 6.18.48
-  linux_sha256: 5ebdadb10a4b5708fc6b1c457764a110bc49f8150cc3502c59b921ead8c6fc8c
-  linux_sha512: 711e08958a8a4c39206018d0222687dc5a01845a9226ae44f7d3f0cfcea76caae041cee958dfe8c0cfc8c728a5a2241b29018ccf1b7593b9615c27057d2628c4
+  linux_version: 7.2.2
+  linux_sha256: 7d0e7ce14f98c43efe880cffbf354a59be45928fdf7170d7333c374ae91c0d83
+  linux_sha512: 6ca338fd2f9d2224b9187ba1cad18c05417c0504771917203a023467a8ac3a34e346bd3bc5a3f5716aa9810381a28c730ea5fc3726773dca36d75a4677178b13
 
   # renovate: datasource=git-tags extractVersion=^libaio-(?<version>.*)$ depName=https://pagure.io/libaio.git
   libaio_version: 0.3.113

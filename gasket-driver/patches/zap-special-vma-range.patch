@@ -1,0 +1,29 @@
+From: Tom Plant <tom@tplant.com.au>
+Subject: [PATCH] Use zap_special_vma_range() on kernels >= 7.1
+
+Linux 7.1 renamed zap_vma_ptes() to zap_special_vma_range(). The
+signature is unchanged, so alias the old name on newer kernels.
+
+See https://github.com/torvalds/linux/commit/52a9e9cd181fab8b03cf4e982533224697669976
+---
+ src/gasket_core.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/src/gasket_core.c b/src/gasket_core.c
+--- a/src/gasket_core.c
++++ b/src/gasket_core.c
+@@ -29,6 +29,14 @@
+ #include <linux/sched.h>
+ #include <linux/version.h>
+ 
++/*
++ * Linux 7.1 renamed zap_vma_ptes() to zap_special_vma_range(), keeping the
++ * same signature.
++ */
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(7, 1, 0)
++#define zap_vma_ptes zap_special_vma_range
++#endif
++
+ #ifdef GASKET_KERNEL_TRACE_SUPPORT
+ #define CREATE_TRACE_POINTS
+ #include <trace/events/gasket_mmap.h>

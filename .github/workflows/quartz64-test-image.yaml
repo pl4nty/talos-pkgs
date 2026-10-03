@@ -155,5 +155,6 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: talos-${{ env.OVERLAY_NAME }}-${{ needs.talos.outputs.tag }}
-          path: _out/metal-arm64.raw.xz
+          path: _out/metal-arm64.raw.*
+          if-no-files-found: error
           compression-level: 0

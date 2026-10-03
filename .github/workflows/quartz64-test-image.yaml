@@ -1,0 +1,130 @@
+# Test-only workflow: builds the arm64 kernel from this branch, a Talos imager
+# using that kernel, the sbc-rockchip overlay, and a SOQuartz CM4 disk image.
+# Not intended for upstream.
+name: quartz64-test-image
+
+'on':
+  push:
+    branches:
+      - claude/quartz64-kernel-mexpbk
+  workflow_dispatch: {}
+
+concurrency:
+  group: quartz64-test-image-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  REGISTRY: ghcr.io
+  USERNAME: ${{ github.repository_owner }}/talos-pkgs
+  TALOS_REF: 3663614ba772f02acce10ed0d06405d48e8f5b2d
+  SBC_REPO: pl4nty/talos-sbc-rockchip
+  SBC_REF: claude/quartz64-kernel-mexpbk
+  OVERLAY_NAME: soquartz-cm4
+
+jobs:
+  kernel:
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 360
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
+    steps:
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL || true
+          df -h /
+      - uses: actions/checkout@v4
+      - id: tag
+        run: echo "tag=quartz64-${GITHUB_SHA::12}" >> "$GITHUB_OUTPUT"
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push kernel
+        run: |
+          make kernel PLATFORM=linux/arm64 PROGRESS=plain PUSH=true \
+            REGISTRY=$REGISTRY USERNAME=$USERNAME TAG=${{ steps.tag.outputs.tag }}
+      - name: List modules added by this branch
+        run: |
+          id=$(docker create --platform linux/arm64 $REGISTRY/$USERNAME/kernel:${{ steps.tag.outputs.tag }} /bin/true)
+          docker cp $id:/ ./kroot
+          find kroot -name 'hantro*' -o -name '*rk817*' -o -name '*i2s-tdm*' -o -name '*spdif*' -o -name '*csidphy*' | sort
+          grep -E 'MOTORCOMM|HANTRO|RK817|I2S_TDM|SPDIF|CSIDPHY' kroot/boot/config* || true
+
+  talos:
+    needs: kernel
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 240
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
+    steps:
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL || true
+      - uses: actions/checkout@v4
+        with:
+          repository: siderolabs/talos
+          ref: ${{ env.TALOS_REF }}
+          fetch-depth: 0
+      - id: tag
+        run: echo "tag=$(git describe --tag --always --match 'v[0-9]*')-quartz64" >> "$GITHUB_OUTPUT"
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push installer-base and imager
+        run: |
+          make installer-base imager PLATFORM=linux/arm64 INSTALLER_ARCH=targetarch PROGRESS=plain PUSH=true \
+            REGISTRY=$REGISTRY USERNAME=$USERNAME TAG=${{ steps.tag.outputs.tag }} \
+            PKG_KERNEL=$REGISTRY/$USERNAME/kernel:${{ needs.kernel.outputs.tag }}
+
+  image:
+    needs: talos
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ env.SBC_REPO }}
+          ref: ${{ env.SBC_REF }}
+          fetch-depth: 0
+      - id: tag
+        run: echo "tag=quartz64-$(git rev-parse --short=12 HEAD)" >> "$GITHUB_OUTPUT"
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push sbc-rockchip overlay
+        run: |
+          make sbc-rockchip PLATFORM=linux/arm64 PROGRESS=plain PUSH=true \
+            REGISTRY=$REGISTRY USERNAME=$USERNAME TAG=${{ steps.tag.outputs.tag }}
+      - name: Build disk image and installer
+        run: |
+          IMAGER=$REGISTRY/$USERNAME/imager:${{ needs.talos.outputs.tag }}
+          ARGS="--arch arm64 \
+            --base-installer-image $REGISTRY/$USERNAME/installer-base:${{ needs.talos.outputs.tag }} \
+            --overlay-image $REGISTRY/$USERNAME/sbc-rockchip:${{ steps.tag.outputs.tag }} \
+            --overlay-name $OVERLAY_NAME"
+          mkdir -p _out
+          docker run --rm -t --privileged -v /dev:/dev -v $PWD/_out:/out $IMAGER metal $ARGS
+          docker run --rm -t --privileged -v /dev:/dev -v $PWD/_out:/out $IMAGER installer $ARGS
+          ls -la _out
+      - uses: imjasonh/setup-crane@v0.4
+      - name: Push overlay installer
+        run: |
+          crane push _out/installer-arm64.tar \
+            $REGISTRY/$USERNAME/installer:$OVERLAY_NAME-${{ needs.talos.outputs.tag }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: talos-${{ env.OVERLAY_NAME }}-${{ needs.talos.outputs.tag }}
+          path: _out/metal-arm64.raw.xz
+          compression-level: 0

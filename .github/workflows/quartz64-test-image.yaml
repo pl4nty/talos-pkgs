@@ -20,7 +20,8 @@ permissions:
 env:
   REGISTRY: ghcr.io
   USERNAME: ${{ github.repository_owner }}/talos-pkgs
-  TALOS_REF: 3663614ba772f02acce10ed0d06405d48e8f5b2d
+  TALOS_REPO: pl4nty/talos
+  TALOS_REF: claude/quartz64-kernel-mexpbk
   SBC_REPO: pl4nty/talos-sbc-rockchip
   SBC_REF: claude/quartz64-kernel-mexpbk
   OVERLAY_NAME: soquartz-cm4
@@ -79,9 +80,11 @@ jobs:
           sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL || true
       - uses: actions/checkout@v4
         with:
-          repository: siderolabs/talos
+          repository: ${{ env.TALOS_REPO }}
           ref: ${{ env.TALOS_REF }}
           fetch-depth: 0
+      - name: Fetch upstream tags
+        run: git fetch --tags https://github.com/siderolabs/talos main
       - id: tag
         run: echo "tag=$(git describe --tag --always --match 'v[0-9]*')-quartz64" >> "$GITHUB_OUTPUT"
       - uses: docker/setup-buildx-action@v3

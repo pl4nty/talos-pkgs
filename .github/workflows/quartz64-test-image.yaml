@@ -64,8 +64,8 @@ jobs:
         run: |
           id=$(docker create --platform linux/arm64 $REGISTRY/$USERNAME/kernel:${{ steps.tag.outputs.tag }} /bin/true)
           docker cp $id:/ ./kroot
-          find kroot -name 'hantro*' -o -name '*rk817*' -o -name '*i2s-tdm*' -o -name '*spdif*' -o -name '*csidphy*' | sort
-          grep -E 'MOTORCOMM|HANTRO|RK817|I2S_TDM|SPDIF|CSIDPHY' kroot/boot/config* || true
+          find kroot -name 'motorcomm*' | sort
+          grep -E 'MOTORCOMM' kroot/boot/config* || true
 
   talos:
     needs: kernel

@@ -144,9 +144,28 @@ jobs:
             --overlay-image $REGISTRY/$USERNAME/sbc-rockchip:${{ steps.tag.outputs.tag }} \
             --overlay-name $OVERLAY_NAME"
           mkdir -p _out
-          docker run --rm -t --privileged -v /dev:/dev -v $PWD/_out:/out $IMAGER metal $ARGS
+          # sbc profiles need grub: sd-boot skips the overlay install step (U-Boot + DTB) in image mode
+          cat <<'PROFILE' | docker run --rm -i --privileged -v /dev:/dev -v $PWD/_out:/out $IMAGER - $ARGS
+          arch: arm64
+          platform: metal
+          secureboot: false
+          output:
+            kind: image
+            outFormat: .zst
+            imageOptions:
+              diskSize: 1306525696
+              diskFormat: raw
+              bootloader: grub
+          PROFILE
           docker run --rm -t --privileged -v /dev:/dev -v $PWD/_out:/out $IMAGER installer $ARGS
           ls -la _out
+      - name: Check U-Boot and DTB are in the image
+        run: |
+          zstd -d -q -o metal.raw _out/metal-arm64.raw.zst
+          dd if=metal.raw bs=512 skip=64 count=1 2>/dev/null | od -A n -c | head -2
+          test "$(dd if=metal.raw bs=512 skip=64 count=4 2>/dev/null | tr -d '\0' | wc -c)" -gt 0
+          grep -a -c 'soquartz' metal.raw
+          rm metal.raw
       - uses: imjasonh/setup-crane@v0.4
       - name: Push overlay installer
         run: |

@@ -7,7 +7,12 @@ name: quartz64-test-image
   push:
     branches:
       - claude/quartz64-kernel-mexpbk
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      kernel_tag:
+        description: Reuse an already pushed kernel tag instead of building one
+        required: false
+        default: ''
 
 concurrency:
   group: quartz64-test-image-${{ github.ref }}
@@ -38,26 +43,36 @@ jobs:
           sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL || true
           df -h /
       - uses: actions/checkout@v4
-      - id: tag
-        run: echo "tag=quartz64-${GITHUB_SHA::12}" >> "$GITHUB_OUTPUT"
       - uses: docker/setup-buildx-action@v3
       - uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - id: tag
+        # keyed on the last commit touching the kernel, so CI-only commits reuse the pushed kernel
+        run: |
+          tag=${{ inputs.kernel_tag }}
+          tag=${tag:-quartz64-$(git log -1 --format=%h --abbrev=12 -- kernel/ Pkgfile)}
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          if docker manifest inspect $REGISTRY/$USERNAME/kernel:$tag >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          fi
       - name: Normalize kernel config (olddefconfig)
+        if: steps.tag.outputs.exists != 'true'
         run: |
           make local-kernel-build TARGET_ARGS="--build-arg=KERNEL_TARGET=olddefconfig" \
             PLATFORM=linux/arm64 PROGRESS=plain DEST=kernel/build
           git diff kernel/build/config-arm64 | tee config-arm64.diff
       - uses: actions/upload-artifact@v4
+        if: steps.tag.outputs.exists != 'true'
         with:
           name: config-arm64
           path: |
             kernel/build/config-arm64
             config-arm64.diff
       - name: Build and push kernel
+        if: steps.tag.outputs.exists != 'true'
         run: |
           make kernel PLATFORM=linux/arm64 PROGRESS=plain PUSH=true \
             REGISTRY=$REGISTRY USERNAME=$USERNAME TAG=${{ steps.tag.outputs.tag }}
@@ -84,7 +99,7 @@ jobs:
           ref: ${{ env.TALOS_REF }}
           fetch-depth: 0
       - name: Fetch upstream tags
-        run: git fetch --tags https://github.com/siderolabs/talos main
+        run: git fetch --force --tags https://github.com/siderolabs/talos main
       - id: tag
         run: echo "tag=$(git describe --tag --always --match 'v[0-9]*')-quartz64" >> "$GITHUB_OUTPUT"
       - uses: docker/setup-buildx-action@v3

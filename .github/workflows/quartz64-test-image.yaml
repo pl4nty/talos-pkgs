@@ -45,6 +45,17 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Normalize kernel config (olddefconfig)
+        run: |
+          make local-kernel-build TARGET_ARGS="--build-arg=KERNEL_TARGET=olddefconfig" \
+            PLATFORM=linux/arm64 PROGRESS=plain DEST=kernel/build
+          git diff kernel/build/config-arm64 | tee config-arm64.diff
+      - uses: actions/upload-artifact@v4
+        with:
+          name: config-arm64
+          path: |
+            kernel/build/config-arm64
+            config-arm64.diff
       - name: Build and push kernel
         run: |
           make kernel PLATFORM=linux/arm64 PROGRESS=plain PUSH=true \

@@ -10,6 +10,8 @@ concurrency:
     branches:
       - main
       - release-*
+      # test-only: push the kernel so the Talos and sbc-riscv64 test branches can use it
+      - claude/project-thread-vop532
     tags:
       - v*
   pull_request:

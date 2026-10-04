@@ -56,7 +56,7 @@ jobs:
         # keyed on the last commit touching the kernel, so CI-only commits reuse the pushed kernel
         run: |
           # pinned to the last built kernel so overlay-only pushes don't rebuild it; clear when kernel/ changes
-          tag=${{ inputs.kernel_tag || 'quartz64-5e6fc8a56814' }}
+          tag=${{ inputs.kernel_tag }}
           tag=${tag:-quartz64-$(git log -1 --format=%h --abbrev=12 -- kernel/ Pkgfile)}
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
           if docker manifest inspect $REGISTRY/$USERNAME/kernel:$tag >/dev/null 2>&1; then

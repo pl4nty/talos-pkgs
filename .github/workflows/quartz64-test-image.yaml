@@ -109,7 +109,12 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push installer-base and imager
+        # skip when this Talos commit is already built, so overlay-only iterations are quick
         run: |
+          if docker manifest inspect $REGISTRY/$USERNAME/imager:${{ steps.tag.outputs.tag }} >/dev/null 2>&1 &&
+             docker manifest inspect $REGISTRY/$USERNAME/installer-base:${{ steps.tag.outputs.tag }} >/dev/null 2>&1; then
+            echo "already built"; exit 0
+          fi
           make installer-base imager PLATFORM=linux/arm64 INSTALLER_ARCH=targetarch PROGRESS=plain PUSH=true \
             REGISTRY=$REGISTRY USERNAME=$USERNAME TAG=${{ steps.tag.outputs.tag }} \
             PKG_KERNEL=$REGISTRY/$USERNAME/kernel:${{ needs.kernel.outputs.tag }}

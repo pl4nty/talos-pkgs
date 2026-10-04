@@ -144,11 +144,21 @@ jobs:
             --overlay-image $REGISTRY/$USERNAME/sbc-rockchip:${{ steps.tag.outputs.tag }} \
             --overlay-name $OVERLAY_NAME"
           mkdir -p _out
-          # sbc profiles need grub: sd-boot skips the overlay install step (U-Boot + DTB) in image mode
-          cat <<'PROFILE' | docker run --rm -i --privileged -v /dev:/dev -v $PWD/_out:/out $IMAGER - $ARGS
+          # sbc profiles need grub: sd-boot skips the overlay install step (U-Boot + DTB) in image mode.
+          # A stdin profile ignores the CLI flags, so inputs and overlay go in the YAML.
+          cat <<PROFILE | docker run --rm -i --privileged -v /dev:/dev -v $PWD/_out:/out $IMAGER -
           arch: arm64
           platform: metal
           secureboot: false
+          input:
+            baseInstaller:
+              imageRef: $REGISTRY/$USERNAME/installer-base:${{ needs.talos.outputs.tag }}
+            overlayInstaller:
+              imageRef: $REGISTRY/$USERNAME/sbc-rockchip:${{ steps.tag.outputs.tag }}
+          overlay:
+            name: $OVERLAY_NAME
+            image:
+              imageRef: $REGISTRY/$USERNAME/sbc-rockchip:${{ steps.tag.outputs.tag }}
           output:
             kind: image
             outFormat: .zst

@@ -37,6 +37,10 @@ steps:
       - |
         cd /src
 
+        # KBUILD_OUTPUT is a cache mount, not part of this stage's snapshot.
+        # Module packages read it via their own /src/build cache mount, so if
+        # the cache is evicted while this layer stays cached, change this step
+        # to force a rebuild.
         make -j $(nproc)
         make -j $(nproc) modules
 

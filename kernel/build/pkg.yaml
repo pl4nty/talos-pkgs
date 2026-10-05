@@ -40,7 +40,12 @@ steps:
         # KBUILD_OUTPUT is a cache mount, not part of this stage's snapshot.
         # Module packages read it via their own /src/build cache mount, so if
         # the cache is evicted while this layer stays cached, change this step
-        # to force a rebuild.
+        # to force a rebuild.{{ if eq .ARCH "riscv64" }}
+        # LLVM 20+ merges globals on riscv64, and pahole 1.31 then writes
+        # overlapping percpu offsets into BTF, so every module fails to load
+        # with "failed to validate module BTF: -22". pahole 1.32 has the fix.
+        # https://github.com/ClangBuiltLinux/linux/issues/2089
+        export KCFLAGS="-mllvm -riscv-enable-global-merge=false"{{ end }}
         make -j $(nproc)
         make -j $(nproc) modules
 

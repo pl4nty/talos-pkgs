@@ -15,10 +15,10 @@ vars:
   cni_sha512: 5811fb14786f1f9d9e40741ce337449ce329e14e04213bc660102eb470150f24026e59caec480572e37d0e3e6e6518737f3cc7ac462c47034d0737283ec532f9
 
   # renovate: datasource=github-tags depName=containerd/containerd
-  containerd_version: v2.3.5
-  containerd_ref: 1294c24a7da8e5a793ed378161673abe94118892
-  containerd_sha256: a99a4dca98061064ff4cb35d27d1ec2345717e9108c822329fcec91dc72bff96
-  containerd_sha512: 87255f36b2b2fb5fc2cb7abaadae33c2ea85b5f7a1259c8c52cc3cf3efffa64525886a220eadf804b7c6414babe7310d39fddc6a24e79b707770fb621323f5c8
+  containerd_version: v2.3.6
+  containerd_ref: ee2735368117d2eb259779949d5e75cdafec9761
+  containerd_sha256: b4b407c64e11a22549b14c47857ac0e02e9f47f8cfc28924e9aa04a0adcaa883
+  containerd_sha512: 47e13e5442fbf25f37faca76882aad58a927ff2fc0cdb5cd41b1ab75204a5e02269220709da5b1c0a4dd588d5a8b61132219c83eabd3bd7a4a64e6ff7f22ac72
 
   # renovate: datasource=github-tags depName=kdave/btrfs-progs
   btrfsprogs_version: 6.19.1
@@ -267,10 +267,10 @@ vars:
   qemu_sha512: f30b36800b44ac0370e63341a8c5591019648a78d5929e18b0177873c0b6e4a0cbbddc069337cb06a3b5d20d15779c9b9786d0a92073c421fb07ae14a67d4646
 
   # renovate: datasource=github-tags depName=opencontainers/runc
-  runc_version: v1.5.1
-  runc_ref: 8f2685a471d3347a686ad3909783d8aafc6bb208
-  runc_sha256: db743b39fd7de8da88adce5a61a54529a494928cd59227fffb622f5cb4ba6ef9
-  runc_sha512: bffbbd64d7990e591d980de370795b48cf4c27f7b50a8227065f8ff83d82fc22652ac848f231f1cc0f7cbab2082cb74cd2fc7196bcddcd145fd4326582dcc296
+  runc_version: v1.5.2
+  runc_ref: 29dd3dc2b13b4123162e5fe132504bb4b15569f1
+  runc_sha256: 46eba094e45fc37d96a1b1dc150971fe8d076d6e23bae09dd35443141bed31a1
+  runc_sha512: b7323cd1b2bdc0d12f172c4ce2957d31845a4c97390e0ec0d3333bb766ef117f25c47cd4546ab22b0287a8e6da816100638636379bdd044634599a6918a9cb77
 
   # renovate: datasource=git-tags extractVersion=^tag-(?<version>.*)$ depName=git://repo.or.cz/socat.git
   socat_version: 1.8.1.3

@@ -14,7 +14,8 @@ steps:
         # This stage reads the kernel-build output from the /src/build cache
         # mount, so buildkit can't see when the build changed. Bump this line
         # whenever kernel-build changes without a /src change.
-        # Rebuilt for: riscv64 DRM_POWERVR=m, TH1520 SDIO card-detect patch.
+        # Rebuilt for: riscv64 DRM_POWERVR=m, TH1520 SDIO card-detect patch,
+        # SpacemiT K1 (LicheePi 3A) clock and reset built in.
         cd /src/build
 
         mkdir -p /rootfs/boot

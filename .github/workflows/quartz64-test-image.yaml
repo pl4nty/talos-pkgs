@@ -158,7 +158,14 @@ jobs:
         # test-only: the cloud session that edits the overlay can't reach ftp.denx.de
         run: |
           v=$(awk '/uboot_version:/ {print $2}' Pkgfile)
-          curl -sSfLo u-boot.tar.bz2 https://ftp.denx.de/pub/u-boot/u-boot-$v.tar.bz2
+          url=https://ftp.denx.de/pub/u-boot/u-boot-$v.tar.bz2
+          if ! curl -sSfLo u-boot.tar.bz2 $url; then
+            # test-only: a fresh release can reach the GitHub mirror before ftp.denx.de
+            url=https://github.com/u-boot/u-boot/archive/refs/tags/v$v.tar.gz
+            curl -sSfLo u-boot.tar.bz2 $url
+            sed -i "s#https://ftp.denx.de/pub/u-boot/u-boot-{{ .uboot_version }}.tar.bz2#$url#" artifacts/soquartz-cm4/u-boot/pkg.yaml
+          fi
+          echo "u-boot source: $url"
           s256=$(sha256sum u-boot.tar.bz2 | cut -d' ' -f1); s512=$(sha512sum u-boot.tar.bz2 | cut -d' ' -f1)
           echo "u-boot $v sha256=$s256 sha512=$s512"
           sed -i "s/uboot_sha256: FILLED_BY_CI/uboot_sha256: $s256/; s/uboot_sha512: FILLED_BY_CI/uboot_sha512: $s512/" Pkgfile

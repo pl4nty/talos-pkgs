@@ -14,7 +14,7 @@ steps:
         # This stage reads the kernel-build output from the /src/build cache
         # mount, so buildkit can't see when the build changed. Bump this line
         # whenever kernel-build changes without a /src change.
-        # Rebuilt for: riscv64 LPi4A Wi-Fi 3.3 V supply (DTS 0018).
+        # Rebuilt for: riscv64 PINCTRL_TH1520=y (GPIO probe order).
         cd /src/build
 
         mkdir -p /rootfs/boot

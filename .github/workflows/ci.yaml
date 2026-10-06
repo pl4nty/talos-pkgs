@@ -29,8 +29,9 @@ jobs:
       pull-requests: read
     runs-on:
       - ubuntu-latest
+    # test-only: the test branch's push run already builds and pushes each commit
     if: (!startsWith(github.head_ref, 'renovate/') && !startsWith(github.head_ref,
-      'dependabot/'))
+      'dependabot/') && github.head_ref != 'claude/project-thread-vop532')
     outputs:
       labels: ${{ steps.retrieve-pr-labels.outputs.result }}
     steps:

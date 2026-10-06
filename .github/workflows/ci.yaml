@@ -12,6 +12,8 @@ concurrency:
       - release-*
       # test-only: push the kernel so the Talos and sbc-riscv64 test branches can use it
       - claude/project-thread-vop532
+      # test-only: LicheePi 3A kernel
+      - claude/project-thread-cv8ehe
     tags:
       - v*
   pull_request:
@@ -31,7 +33,7 @@ jobs:
       - ubuntu-latest
     # test-only: the test branch's push run already builds and pushes each commit
     if: (!startsWith(github.head_ref, 'renovate/') && !startsWith(github.head_ref,
-      'dependabot/') && github.head_ref != 'claude/project-thread-vop532')
+      'dependabot/') && github.head_ref != 'claude/project-thread-vop532' && github.head_ref != 'claude/project-thread-cv8ehe')
     outputs:
       labels: ${{ steps.retrieve-pr-labels.outputs.result }}
     steps:

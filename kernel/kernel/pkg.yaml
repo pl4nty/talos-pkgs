@@ -14,7 +14,7 @@ steps:
         # This stage reads the kernel-build output from the /src/build cache
         # mount, so buildkit can't see when the build changed. Bump this line
         # whenever kernel-build changes without a /src change.
-        # Rebuilt for: riscv64 PINCTRL_TH1520=y (GPIO probe order).
+        # Rebuilt for: riscv64 DRM_POWERVR=m with built-in BXM-4-64 firmware.
         cd /src/build
 
         mkdir -p /rootfs/boot

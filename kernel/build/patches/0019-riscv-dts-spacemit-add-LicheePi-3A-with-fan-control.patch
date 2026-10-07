@@ -22,7 +22,7 @@ critical shutdown. Add active trips at 45/60/75C that step the fan up.
  dtb-$(CONFIG_ARCH_SPACEMIT) += k1-orangepi-r2s.dtb
 --- /dev/null
 +++ b/arch/riscv/boot/dts/spacemit/k1-lichee-pi-3a.dts
-@@ -0,0 +1,67 @@
+@@ -0,0 +1,81 @@
 +// SPDX-License-Identifier: GPL-2.0 OR MIT
 +/*
 + * Sipeed LicheePi 3A: the Lichee Module 3A (the K1 reference design, same as
@@ -90,3 +90,17 @@ critical shutdown. Add active trips at 45/60/75C that step the fan up.
 +		};
 +	};
 +};
++
++/*
++ * The carrier hub may not match the BPI-F3's VL817 pair, and onboard-usb-dev
++ * cycling its power/reset (HUB_PWREN GPIO_123, HUB_RST GPIO_124) after it has
++ * enumerated hangs the xHC ("HC died"). Keep the hub powered from boot and
++ * let it enumerate as a plain USB hub.
++ */
++&usb3_hub_5v {
++	regulator-boot-on;
++	regulator-always-on;
++};
++
++/delete-node/ &hub_2_0;
++/delete-node/ &hub_3_0;

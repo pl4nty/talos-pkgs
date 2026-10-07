@@ -12,24 +12,16 @@ steps:
     cachePaths:
       - /src/build{{ if eq .ARCH "riscv64" }}
     # Built into vmlinux (CONFIG_EXTRA_FIRMWARE): Talos ships no
-    # /lib/firmware, and the TH1520 BXM-4-64 GPU and the Lichee Pi 4A
-    # RTL8723DS Wi-Fi need these to start.
+    # /lib/firmware, and the TH1520 BXM-4-64 GPU needs this to start.
     sources:
       - url: https://gitlab.com/kernel-firmware/linux-firmware/-/raw/{{ .linux_firmware_version }}/powervr/rogue_36.52.104.182_v1.fw
         destination: rogue_36.52.104.182_v1.fw
         sha256: e0cdfda85e6f44d5591f94bde7e6b52a772eef21c80baa1c14d3efdf8e90747a
-        sha512: 461b18f868c898c929d4e9d489880295455b48fba0769e67c59a1641fa8ddfb4b639cf34a94a9fb56572cde6c7b5b184c3744f274226d45e4eae642ef08c0aa1
-      # Lichee Pi 4A RTL8723DS Wi-Fi (rtw88_8723ds)
-      - url: https://gitlab.com/kernel-firmware/linux-firmware/-/raw/{{ .linux_firmware_version }}/rtw88/rtw8723d_fw.bin
-        destination: rtw8723d_fw.bin
-        sha256: 9c64e079815a333a3f7b731be7cc0be65206ebc883891659dc8ff5ed36a5e2f5
-        sha512: a8831d9be69fbbe06097886054f514aa644bdedbdb48cffe8a59f06cdbfde4c9d23c6f0a75d20f62c8f2c3f8a005d1a5f607ce499f2bdb12df387d390108f82a{{ end }}
+        sha512: 461b18f868c898c929d4e9d489880295455b48fba0769e67c59a1641fa8ddfb4b639cf34a94a9fb56572cde6c7b5b184c3744f274226d45e4eae642ef08c0aa1{{ end }}
     prepare:
       - |{{ if eq .ARCH "riscv64" }}
         mkdir -p /src/firmware/powervr
-        cp -v rogue_36.52.104.182_v1.fw /src/firmware/powervr/
-        mkdir -p /src/firmware/rtw88
-        cp -v rtw8723d_fw.bin /src/firmware/rtw88/{{ end }}
+        cp -v rogue_36.52.104.182_v1.fw /src/firmware/powervr/{{ end }}
         cd /src
         cp -v /pkg/config-${CARCH} ${KBUILD_OUTPUT}/.config
         cp -v /pkg/certs/* certs/

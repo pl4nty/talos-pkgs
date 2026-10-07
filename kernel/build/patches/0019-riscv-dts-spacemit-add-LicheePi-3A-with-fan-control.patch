@@ -1,0 +1,92 @@
+From: Tom Plant <tom@tplant.com.au>
+Subject: [PATCH] riscv: dts: spacemit: add LicheePi 3A with fan control
+
+The Lichee Module 3A is the K1 reference design, so it runs the BPI-F3 DT,
+but its carrier has a fan header the BPI-F3 lacks. SpacemiT's vendor DT
+drives it from rcpu_pwm2 on GPIO_79. Upstream has no clocks for the RCPU2
+PWMs yet, so bit-bang GPIO_79 with pwm-gpio instead, as on the Lichee Pi
+4A, which shares this carrier. The pinctrl driver muxes the pad to GPIO when
+it's requested.
+
+Without this the fan never spins, and the only package trip is the 115C
+critical shutdown. Add active trips at 45/60/75C that step the fan up.
+
+--- a/arch/riscv/boot/dts/spacemit/Makefile
++++ b/arch/riscv/boot/dts/spacemit/Makefile
+@@ -1,5 +1,6 @@
+ # SPDX-License-Identifier: GPL-2.0
+ dtb-$(CONFIG_ARCH_SPACEMIT) += k1-bananapi-f3.dtb
++dtb-$(CONFIG_ARCH_SPACEMIT) += k1-lichee-pi-3a.dtb
+ dtb-$(CONFIG_ARCH_SPACEMIT) += k1-milkv-jupiter.dtb
+ dtb-$(CONFIG_ARCH_SPACEMIT) += k1-musepi-pro.dtb
+ dtb-$(CONFIG_ARCH_SPACEMIT) += k1-orangepi-r2s.dtb
+--- /dev/null
++++ b/arch/riscv/boot/dts/spacemit/k1-lichee-pi-3a.dts
+@@ -0,0 +1,67 @@
++// SPDX-License-Identifier: GPL-2.0 OR MIT
++/*
++ * Sipeed LicheePi 3A: the Lichee Module 3A (the K1 reference design, same as
++ * the BPI-F3) on the Lichee Pi 4A carrier, which adds a fan header.
++ */
++
++#include "k1-bananapi-f3.dts"
++
++/ {
++	model = "Sipeed LicheePi 3A";
++	compatible = "sipeed,lichee-pi-3a", "spacemit,k1";
++
++	gpio_pwm: gpio-pwm {
++		compatible = "pwm-gpio";
++		#pwm-cells = <3>;
++		gpios = <&gpio K1_GPIO(79) GPIO_ACTIVE_HIGH>;
++	};
++
++	fan: pwm-fan {
++		compatible = "pwm-fan";
++		#cooling-cells = <2>;
++		/* pwm-gpio bit-bangs from an hrtimer, so keep the period long */
++		pwms = <&gpio_pwm 0 100000000 0>;
++		cooling-levels = <0 120 200 255>;
++	};
++};
++
++&{/thermal-zones/package-thermal} {
++	polling-delay = <2000>;
++
++	trips {
++		package_fan0: package-fan0 {
++			temperature = <45000>;
++			hysteresis = <5000>;
++			type = "active";
++		};
++
++		package_fan1: package-fan1 {
++			temperature = <60000>;
++			hysteresis = <5000>;
++			type = "active";
++		};
++
++		package_fan2: package-fan2 {
++			temperature = <75000>;
++			hysteresis = <5000>;
++			type = "active";
++		};
++	};
++
++	cooling-maps {
++		map0 {
++			trip = <&package_fan0>;
++			cooling-device = <&fan 1 1>;
++		};
++
++		map1 {
++			trip = <&package_fan1>;
++			cooling-device = <&fan 2 2>;
++		};
++
++		map2 {
++			trip = <&package_fan2>;
++			cooling-device = <&fan 3 3>;
++		};
++	};
++};

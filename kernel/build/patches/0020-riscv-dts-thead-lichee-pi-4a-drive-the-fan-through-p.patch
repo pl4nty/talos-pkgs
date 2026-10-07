@@ -1,0 +1,51 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Tom Plant <tom@tplant.com.au>
+Date: Wed, 7 Oct 2026 04:30:00 +0000
+Subject: [PATCH] riscv: dts: thead: lichee-pi-4a: drive the fan through
+ pwm-gpio
+
+The TH1520 PWM controller driver (PWM_TH1520) is written in Rust, so a
+kernel built without Rust has no provider for &pwm and pwm-fan defers
+forever: the fan never spins and the cpu-thermal cooling map has no
+device. Drive GPIO3_3 as a GPIO-backed software PWM instead, keeping
+the 10 ms period and the cooling levels.
+
+Co-Authored-By: Claude Opus 5.5 (1M context) <noreply@anthropic.com>
+---
+--- a/arch/riscv/boot/dts/thead/th1520-lichee-pi-4a.dts
++++ b/arch/riscv/boot/dts/thead/th1520-lichee-pi-4a.dts
+@@ -92,12 +92,22 @@
+ 		};
+ 	};
+ 
++	/*
++	 * The TH1520 PWM driver is written in Rust, so drive the fan pin
++	 * as a GPIO-backed software PWM for kernels built without Rust.
++	 */
++	fan_pwm: pwm-gpio {
++		compatible = "pwm-gpio";
++		#pwm-cells = <3>;
++		gpios = <&gpio3 3 GPIO_ACTIVE_HIGH>;
++	};
++
+ 	fan: pwm-fan {
+ 		pinctrl-names = "default";
+ 		pinctrl-0 = <&fan_pins>;
+ 		compatible = "pwm-fan";
+ 		#cooling-cells = <2>;
+-		pwms = <&pwm 1 10000000 0>;
++		pwms = <&fan_pwm 0 10000000 0>;
+ 		cooling-levels = <0 66 196 255>;
+ 	};
+ 
+@@ -121,7 +131,7 @@
+ 	fan_pins: fan-0 {
+ 		pwm1-pins {
+ 			pins = "GPIO3_3"; /* PWM1 */
+-			function = "pwm";
++			function = "gpio";
+ 			bias-disable;
+ 			drive-strength = <25>;
+ 			input-disable;
+-- 
+2.47.0

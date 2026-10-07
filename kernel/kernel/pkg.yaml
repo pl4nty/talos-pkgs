@@ -14,7 +14,7 @@ steps:
         # This stage reads the kernel-build output from the /src/build cache
         # mount, so buildkit can't see when the build changed. Bump this line
         # whenever kernel-build changes without a /src change.
-        # Rebuilt for: riscv64 TH1520 pinctrl as a module.
+        # Rebuilt for: riscv64 Lichee Pi 4A fan via pwm-gpio.
         cd /src/build
 
         mkdir -p /rootfs/boot

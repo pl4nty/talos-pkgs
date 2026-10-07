@@ -1,0 +1,34 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Tom Plant <tom@tplant.com.au>
+Date: Wed, 7 Oct 2026 00:30:00 +0000
+Subject: [PATCH] riscv: dts: thead: Fix WiFi on Lichee Pi 4A
+
+The RTL8723DS on the Lichee Pi 4A never enumerates:
+
+  mmc2: error -110 whilst initialising SDIO card
+  mmc2: Failed to initialize a non-removable card
+
+The card answers CMD5 and offers 1.8V signalling (S18A), but its I/O
+rail is wired to the board's fixed 1.8V supply, so the CMD11 voltage
+switch fails and every retry times out.
+
+Set no-1-8-v on sdio1 so the core does not attempt the switch.
+
+Fixes: a20241c08385 ("riscv: dts: thead: Enable WiFi on Lichee Pi 4A")
+Assisted-by: Claude
+---
+ arch/riscv/boot/dts/thead/th1520-lichee-pi-4a.dts | 1 +
+ 1 file changed, 1 insertion(+)
+
+--- a/arch/riscv/boot/dts/thead/th1520-lichee-pi-4a.dts
++++ b/arch/riscv/boot/dts/thead/th1520-lichee-pi-4a.dts
+@@ -175,6 +175,7 @@
+ 	cap-sdio-irq;
+ 	keep-power-in-suspend;
+ 	mmc-pwrseq = <&wifi_pwrseq>;
++	no-1-8-v;
+ 	non-removable;
+ 	status = "okay";
+ };
+-- 
+2.43.0

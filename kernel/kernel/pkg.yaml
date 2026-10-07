@@ -11,10 +11,6 @@ steps:
       - /src/build
     install:
       - |
-        # This stage reads the kernel-build output from the /src/build cache
-        # mount, so buildkit can't see when the build changed. Bump this line
-        # whenever kernel-build changes without a /src change.
-        # Rebuilt for: riscv64 TH1520 pinctrl built in again.
         cd /src/build
 
         mkdir -p /rootfs/boot

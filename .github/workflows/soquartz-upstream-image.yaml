@@ -11,7 +11,7 @@ name: soquartz-upstream-image
 
 concurrency:
   group: soquartz-upstream-image-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 permissions:
   contents: read
@@ -23,7 +23,8 @@ env:
   TALOS_REPO: siderolabs/talos
   TALOS_REF: main
   SBC_REPO: pl4nty/talos-sbc-rockchip
-  SBC_REF: claude/soquartz-cm4-upstream
+  # SOQuartz overlay commit 03c5068 (U-Boot 2026.07)
+  SBC_REF: 03c5068b1d2df60ef9575909a16e14e46505f551
   OVERLAY_NAME: soquartz-cm4
 
 jobs:

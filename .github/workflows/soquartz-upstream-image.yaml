@@ -1,0 +1,177 @@
+# Test-only workflow: builds a Talos imager from upstream Talos main with its
+# stock upstream kernel (ghcr.io/siderolabs/kernel, as pinned by PKGS), the
+# sbc-rockchip overlay, and a SOQuartz CM4 disk image. Not intended for upstream.
+name: soquartz-upstream-image
+
+'on':
+  push:
+    branches:
+      - claude/project-thread-ylwc9s
+  workflow_dispatch:
+
+concurrency:
+  group: soquartz-upstream-image-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  REGISTRY: ghcr.io
+  USERNAME: ${{ github.repository_owner }}/talos-pkgs
+  TALOS_REPO: siderolabs/talos
+  TALOS_REF: main
+  SBC_REPO: pl4nty/talos-sbc-rockchip
+  SBC_REF: claude/soquartz-cm4-upstream
+  OVERLAY_NAME: soquartz-cm4
+
+jobs:
+  talos:
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 240
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
+    steps:
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL || true
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ env.TALOS_REPO }}
+          ref: ${{ env.TALOS_REF }}
+          fetch-depth: 0
+      - name: Fetch upstream tags
+        run: git fetch --force --tags https://github.com/siderolabs/talos main
+      - id: tag
+        run: |
+          echo "tag=$(git describe --tag --always --match 'v[0-9]*')-soquartz" >> "$GITHUB_OUTPUT"
+          grep -nE '^PKGS \?=' Makefile
+      - name: Check the upstream kernel has the Motorcomm PHY built in
+        run: |
+          # Talos main's default PKG_KERNEL is ghcr.io/siderolabs/kernel:$(PKGS)
+          kernel=ghcr.io/siderolabs/kernel:$(awk '/^PKGS \?=/ {print $3}' Makefile)
+          echo "kernel: $kernel"
+          id=$(docker create --platform linux/arm64 $kernel /bin/true)
+          docker cp $id:/ ./kroot
+          grep -E 'CONFIG_MOTORCOMM_PHY|^# Linux' kroot/boot/config* || true
+          grep -q 'CONFIG_MOTORCOMM_PHY=y' kroot/boot/config*
+          rm -rf kroot
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push installer-base and imager
+        # skip when this Talos commit is already built, so overlay-only iterations are quick
+        run: |
+          if docker manifest inspect $REGISTRY/$USERNAME/imager:${{ steps.tag.outputs.tag }} >/dev/null 2>&1 &&
+             docker manifest inspect $REGISTRY/$USERNAME/installer-base:${{ steps.tag.outputs.tag }} >/dev/null 2>&1; then
+            echo "already built"; exit 0
+          fi
+          make installer-base imager PLATFORM=linux/arm64 INSTALLER_ARCH=targetarch PROGRESS=plain PUSH=true \
+            REGISTRY=$REGISTRY USERNAME=$USERNAME TAG=${{ steps.tag.outputs.tag }}
+
+  image:
+    needs: talos
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ env.SBC_REPO }}
+          ref: ${{ env.SBC_REF }}
+          fetch-depth: 0
+      - id: tag
+        run: echo "tag=soquartz-$(git rev-parse --short=12 HEAD)" >> "$GITHUB_OUTPUT"
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Trim the overlay to SOQuartz only
+        # test-only: building every board's U-Boot and DTB wastes most of the job
+        run: |
+          python3 - <<'PY'
+          import yaml
+          p = "installers/pkg.yaml"
+          d = yaml.safe_load(open(p))
+          keep = lambda dep: dep.get("stage") in ("soquartz-cm4", "u-boot-soquartz-cm4", "profiles") \
+              or "soquartz" in dep.get("to", "")
+          d["dependencies"] = [dep for dep in d["dependencies"] if keep(dep)]
+          yaml.safe_dump(d, open(p, "w"), sort_keys=False)
+          PY
+          cat installers/pkg.yaml
+      - name: Fill SOQuartz U-Boot hashes
+        # test-only: the cloud session that edits the overlay can't reach ftp.denx.de
+        run: |
+          v=$(awk '/uboot_version:/ {print $2}' Pkgfile)
+          url=https://ftp.denx.de/pub/u-boot/u-boot-$v.tar.bz2
+          if ! curl -sSfLo u-boot.tar.bz2 $url; then
+            # test-only: a fresh release can reach the GitHub mirror before ftp.denx.de
+            url=https://github.com/u-boot/u-boot/archive/refs/tags/v$v.tar.gz
+            curl -sSfLo u-boot.tar.bz2 $url
+            sed -i "s#https://ftp.denx.de/pub/u-boot/u-boot-{{ .uboot_version }}.tar.bz2#$url#" artifacts/soquartz-cm4/u-boot/pkg.yaml
+          fi
+          echo "u-boot source: $url"
+          s256=$(sha256sum u-boot.tar.bz2 | cut -d' ' -f1); s512=$(sha512sum u-boot.tar.bz2 | cut -d' ' -f1)
+          echo "u-boot $v sha256=$s256 sha512=$s512"
+          sed -i "s/uboot_sha256: FILLED_BY_CI/uboot_sha256: $s256/; s/uboot_sha512: FILLED_BY_CI/uboot_sha512: $s512/" Pkgfile
+          rm u-boot.tar.bz2
+      - name: Build and push sbc-rockchip overlay
+        run: |
+          make sbc-rockchip PLATFORM=linux/arm64 PROGRESS=plain PUSH=true \
+            REGISTRY=$REGISTRY USERNAME=$USERNAME TAG=${{ steps.tag.outputs.tag }}
+      - name: Build disk image and installer
+        run: |
+          IMAGER=$REGISTRY/$USERNAME/imager:${{ needs.talos.outputs.tag }}
+          ARGS="--arch arm64 \
+            --base-installer-image $REGISTRY/$USERNAME/installer-base:${{ needs.talos.outputs.tag }} \
+            --overlay-image $REGISTRY/$USERNAME/sbc-rockchip:${{ steps.tag.outputs.tag }} \
+            --overlay-name $OVERLAY_NAME"
+          mkdir -p _out
+          # sbc profiles need grub: sd-boot skips the overlay install step (U-Boot + DTB) in image mode.
+          # A stdin profile ignores the CLI flags, so inputs and overlay go in the YAML.
+          cat <<PROFILE | docker run --rm -i --privileged -v /dev:/dev -v $PWD/_out:/out $IMAGER -
+          arch: arm64
+          platform: metal
+          secureboot: false
+          input:
+            baseInstaller:
+              imageRef: $REGISTRY/$USERNAME/installer-base:${{ needs.talos.outputs.tag }}
+            overlayInstaller:
+              imageRef: $REGISTRY/$USERNAME/sbc-rockchip:${{ steps.tag.outputs.tag }}
+          overlay:
+            name: $OVERLAY_NAME
+            image:
+              imageRef: $REGISTRY/$USERNAME/sbc-rockchip:${{ steps.tag.outputs.tag }}
+          output:
+            kind: image
+            outFormat: .zst
+            imageOptions:
+              diskSize: 1306525696
+              diskFormat: raw
+              bootloader: grub
+          PROFILE
+          docker run --rm -t --privileged -v /dev:/dev -v $PWD/_out:/out $IMAGER installer $ARGS
+          ls -la _out
+      - name: Check U-Boot and DTB are in the image
+        run: |
+          zstd -d -q -o metal.raw _out/metal-arm64.raw.zst
+          dd if=metal.raw bs=512 skip=64 count=1 2>/dev/null | od -A n -c | head -2
+          test "$(dd if=metal.raw bs=512 skip=64 count=4 2>/dev/null | tr -d '\0' | wc -c)" -gt 0
+          grep -a -c 'soquartz' metal.raw
+          rm metal.raw
+      - uses: imjasonh/setup-crane@v0.4
+      - name: Push overlay installer
+        run: |
+          crane push _out/installer-arm64.tar \
+            $REGISTRY/$USERNAME/installer:$OVERLAY_NAME-${{ needs.talos.outputs.tag }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: talos-${{ env.OVERLAY_NAME }}-${{ needs.talos.outputs.tag }}
+          path: _out/metal-arm64.raw.*
+          if-no-files-found: error
+          compression-level: 0

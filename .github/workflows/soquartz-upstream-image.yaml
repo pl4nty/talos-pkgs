@@ -8,6 +8,11 @@ name: soquartz-upstream-image
     branches:
       - claude/project-thread-ylwc9s
   workflow_dispatch:
+    inputs:
+      pkg_kernel:
+        description: Kernel image to use instead of the one Talos main pins (A/B tests)
+        required: false
+        default: ''
 
 concurrency:
   group: soquartz-upstream-image-${{ github.ref }}
@@ -46,12 +51,17 @@ jobs:
         run: git fetch --force --tags https://github.com/siderolabs/talos main
       - id: tag
         run: |
-          echo "tag=$(git describe --tag --always --match 'v[0-9]*')-soquartz" >> "$GITHUB_OUTPUT"
+          suffix=soquartz
+          k="${{ inputs.pkg_kernel }}"
+          # tag the A/B build by kernel version so it never reuses the default imager
+          if [ -n "$k" ]; then suffix=soquartz-k${k##*:}; fi
+          echo "tag=$(git describe --tag --always --match 'v[0-9]*')-$suffix" >> "$GITHUB_OUTPUT"
           grep -nE '^PKGS \?=' Makefile
       - name: Check the upstream kernel has the Motorcomm PHY built in
         run: |
           # Talos main's default PKG_KERNEL is ghcr.io/siderolabs/kernel:$(PKGS)
-          kernel=ghcr.io/siderolabs/kernel:$(awk '/^PKGS \?=/ {print $3}' Makefile)
+          kernel=${{ inputs.pkg_kernel }}
+          kernel=${kernel:-ghcr.io/siderolabs/kernel:$(awk '/^PKGS \?=/ {print $3}' Makefile)}
           echo "kernel: $kernel"
           id=$(docker create --platform linux/arm64 $kernel /bin/true)
           docker cp $id:/ ./kroot
@@ -73,7 +83,8 @@ jobs:
             echo "already built"; exit 0
           fi
           make installer-base imager PLATFORM=linux/arm64 INSTALLER_ARCH=targetarch PROGRESS=plain PUSH=true \
-            REGISTRY=$REGISTRY USERNAME=$USERNAME TAG=${{ steps.tag.outputs.tag }}
+            REGISTRY=$REGISTRY USERNAME=$USERNAME TAG=${{ steps.tag.outputs.tag }} \
+            ${{ inputs.pkg_kernel && format('PKG_KERNEL={0}', inputs.pkg_kernel) || '' }}
 
   image:
     needs: talos

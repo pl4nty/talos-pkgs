@@ -9,6 +9,10 @@ name: soquartz-upstream-image
       - claude/project-thread-ylwc9s
   workflow_dispatch:
     inputs:
+      talos_ref:
+        description: Talos commit to build instead of main (A/B tests; its PKGS pins the kernel)
+        required: false
+        default: ''
       pkg_kernel:
         description: Kernel image to use instead of the one Talos main pins (A/B tests)
         required: false
@@ -45,7 +49,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: ${{ env.TALOS_REPO }}
-          ref: ${{ env.TALOS_REF }}
+          ref: ${{ inputs.talos_ref || env.TALOS_REF }}
           fetch-depth: 0
       - name: Fetch upstream tags
         run: git fetch --force --tags https://github.com/siderolabs/talos main

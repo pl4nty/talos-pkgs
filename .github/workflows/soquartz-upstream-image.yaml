@@ -21,6 +21,10 @@ name: soquartz-upstream-image
         description: Kernel image to use instead of the one Talos main pins (A/B tests)
         required: false
         default: ''
+      extra_kernel_args:
+        description: Test-only, space-separated extra kernel arguments baked into the image (e.g. tracing)
+        required: false
+        default: ''
 
 concurrency:
   group: soquartz-upstream-image-${{ github.ref }}
@@ -146,6 +150,8 @@ jobs:
           make sbc-rockchip PLATFORM=linux/arm64 PROGRESS=plain PUSH=true \
             REGISTRY=$REGISTRY USERNAME=$USERNAME TAG=${{ steps.tag.outputs.tag }}
       - name: Build disk image and installer
+        env:
+          EXTRA_KERNEL_ARGS: ${{ inputs.extra_kernel_args }}
         run: |
           IMAGER=$REGISTRY/$USERNAME/imager:${{ needs.talos.outputs.tag }}
           ARGS="--arch arm64 \
@@ -153,6 +159,15 @@ jobs:
             --overlay-image $REGISTRY/$USERNAME/sbc-rockchip:${{ steps.tag.outputs.tag }} \
             --overlay-name $OVERLAY_NAME"
           mkdir -p _out
+          KARGS=""
+          if [ -n "$EXTRA_KERNEL_ARGS" ]; then
+            KARGS="customization:
+            extraKernelArgs:"
+            for a in $EXTRA_KERNEL_ARGS; do
+              KARGS="$KARGS
+              - $a"
+            done
+          fi
           # sbc profiles need grub: sd-boot skips the overlay install step (U-Boot + DTB) in image mode.
           # A stdin profile ignores the CLI flags, so inputs and overlay go in the YAML.
           cat <<PROFILE | docker run --rm -i --privileged -v /dev:/dev -v $PWD/_out:/out $IMAGER -
@@ -168,6 +183,7 @@ jobs:
             name: $OVERLAY_NAME
             image:
               imageRef: $REGISTRY/$USERNAME/sbc-rockchip:${{ steps.tag.outputs.tag }}
+          $KARGS
           output:
             kind: image
             outFormat: .zst
@@ -212,7 +228,7 @@ jobs:
             $REGISTRY/$USERNAME/installer:$OVERLAY_NAME-${{ needs.talos.outputs.tag }}
       - uses: actions/upload-artifact@v4
         with:
-          name: talos-${{ env.OVERLAY_NAME }}-${{ needs.talos.outputs.tag }}${{ inputs.dtb_eee_broken && '-eee-broken' || '' }}
+          name: talos-${{ env.OVERLAY_NAME }}-${{ needs.talos.outputs.tag }}${{ inputs.dtb_eee_broken && '-eee-broken' || '' }}${{ inputs.extra_kernel_args && '-kargs' || '' }}
           path: _out/metal-arm64.raw.*
           if-no-files-found: error
           compression-level: 0

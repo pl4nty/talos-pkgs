@@ -40,8 +40,8 @@ env:
   TALOS_REPO: siderolabs/talos
   TALOS_REF: main
   SBC_REPO: pl4nty/talos-sbc-rockchip
-  # SOQuartz overlay commit 03c5068 (U-Boot 2026.07)
-  SBC_REF: 03c5068b1d2df60ef9575909a16e14e46505f551
+  # SOQuartz overlay rebased onto upstream main (U-Boot 2026.10, Linux 7.3 pkgs)
+  SBC_REF: 78572d700d754073026f1d97a83a3a6d460526c4
   OVERLAY_NAME: soquartz-cm4
 
 jobs:

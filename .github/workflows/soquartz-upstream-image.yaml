@@ -13,6 +13,10 @@ name: soquartz-upstream-image
         description: Talos commit to build instead of main (A/B tests; its PKGS pins the kernel)
         required: false
         default: ''
+      dtb_eee_broken:
+        description: Test-only, add eee-broken-100tx/1000t to the SOQuartz PHY node in the image's DTB
+        type: boolean
+        default: false
       pkg_kernel:
         description: Kernel image to use instead of the one Talos main pins (A/B tests)
         required: false
@@ -181,6 +185,26 @@ jobs:
           test "$(dd if=metal.raw bs=512 skip=64 count=4 2>/dev/null | tr -d '\0' | wc -c)" -gt 0
           grep -a -c 'soquartz' metal.raw
           rm metal.raw
+      - name: Mark the SOQuartz PHY EEE-broken in the DTB
+        # test-only: checks whether keeping EEE off at the PHY fixes the 7.x link flaps
+        if: inputs.dtb_eee_broken
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq mtools device-tree-compiler
+          zstd -d -q -o metal.raw _out/metal-arm64.raw.zst
+          start=$(sfdisk -J metal.raw | jq '.partitiontable.partitions[] | select(.name=="EFI") | .start')
+          img="metal.raw@@$((start * 512))"
+          dtb=$(mdir -/ -b -i "$img" ::/ | grep 'rk3566-soquartz-cm4.dtb$')
+          echo "dtb: $dtb"
+          mcopy -i "$img" "$dtb" soquartz.dtb
+          node=/ethernet@fe010000/mdio/ethernet-phy@0
+          fdtget -l soquartz.dtb /ethernet@fe010000 || true
+          fdtget -p soquartz.dtb $node
+          fdtput -t s soquartz.dtb $node eee-broken-100tx
+          fdtput -t s soquartz.dtb $node eee-broken-1000t
+          fdtget -p soquartz.dtb $node
+          mcopy -o -i "$img" soquartz.dtb "$dtb"
+          zstd -q -f -T0 -o _out/metal-arm64.raw.zst metal.raw
+          rm metal.raw
       - uses: imjasonh/setup-crane@v0.4
       - name: Push overlay installer
         run: |
@@ -188,7 +212,7 @@ jobs:
             $REGISTRY/$USERNAME/installer:$OVERLAY_NAME-${{ needs.talos.outputs.tag }}
       - uses: actions/upload-artifact@v4
         with:
-          name: talos-${{ env.OVERLAY_NAME }}-${{ needs.talos.outputs.tag }}
+          name: talos-${{ env.OVERLAY_NAME }}-${{ needs.talos.outputs.tag }}${{ inputs.dtb_eee_broken && '-eee-broken' || '' }}
           path: _out/metal-arm64.raw.*
           if-no-files-found: error
           compression-level: 0

@@ -7,6 +7,7 @@ name: soquartz-upstream-image
   push:
     branches:
       - claude/project-thread-ylwc9s
+      - claude/project-thread-fdtjvg
   workflow_dispatch:
     inputs:
       talos_ref:
@@ -21,6 +22,10 @@ name: soquartz-upstream-image
         description: Kernel image to use instead of the one Talos main pins (A/B tests)
         required: false
         default: ''
+      dtb_pcie_gen1:
+        description: Test-only, cap the SOQuartz PCIe 2.0 x1 link to Gen1 (max-link-speed = 1) in the image's DTB
+        type: boolean
+        default: false
       extra_kernel_args:
         description: Test-only, space-separated extra kernel arguments baked into the image (e.g. tracing)
         required: false
@@ -61,9 +66,17 @@ jobs:
           fetch-depth: 0
       - name: Fetch upstream tags
         run: git fetch --force --tags https://github.com/siderolabs/talos main
+      - name: Make the image-mode GRUB prefix relative to its boot disk
+        # test-only: "(hd0,gpt3)" breaks when the boot disk is not GRUB's first disk (SOQuartz eMMC);
+        # with an empty drive GRUB fills in the disk it was loaded from (grub_set_prefix_and_root)
+        run: |
+          f=internal/app/machined/pkg/runtime/v1alpha1/bootloader/grub/install.go
+          sed -i 's|const grubPrefix = "(hd0,gpt3)/grub"|const grubPrefix = "(,gpt3)/grub"|' $f
+          grep -n 'const grubPrefix = "(,gpt3)/grub"' $f
+          git -c user.name=ci -c user.email=ci@localhost commit -qam "test: relative GRUB prefix"
       - id: tag
         run: |
-          suffix=soquartz
+          suffix=soquartz-grubfix
           k="${{ inputs.pkg_kernel }}"
           # tag the A/B build by kernel version so it never reuses the default imager
           if [ -n "$k" ]; then suffix=soquartz-k${k##*:}; fi
@@ -221,6 +234,23 @@ jobs:
           mcopy -o -i "$img" soquartz.dtb "$dtb"
           zstd -q -f -T0 -o _out/metal-arm64.raw.zst metal.raw
           rm metal.raw
+      - name: Cap the SOQuartz PCIe link to Gen1 in the DTB
+        # test-only: checks whether the NVMe link-down/AER loop is Gen2 signal integrity
+        if: inputs.dtb_pcie_gen1
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq mtools device-tree-compiler
+          zstd -d -q -o metal.raw _out/metal-arm64.raw.zst
+          start=$(sfdisk -J metal.raw | jq '.partitiontable.partitions[] | select(.name=="EFI") | .start')
+          img="metal.raw@@$((start * 512))"
+          dtb=$(mdir -/ -b -i "$img" ::/ | grep 'rk3566-soquartz-cm4.dtb$')
+          mcopy -i "$img" "$dtb" soquartz.dtb
+          node=/pcie@fe260000
+          fdtget soquartz.dtb $node max-link-speed
+          fdtput -t u soquartz.dtb $node max-link-speed 1
+          fdtget soquartz.dtb $node max-link-speed
+          mcopy -o -i "$img" soquartz.dtb "$dtb"
+          zstd -q -f -T0 -o _out/metal-arm64.raw.zst metal.raw
+          rm metal.raw
       - uses: imjasonh/setup-crane@v0.4
       - name: Push overlay installer
         run: |
@@ -228,7 +258,7 @@ jobs:
             $REGISTRY/$USERNAME/installer:$OVERLAY_NAME-${{ needs.talos.outputs.tag }}
       - uses: actions/upload-artifact@v4
         with:
-          name: talos-${{ env.OVERLAY_NAME }}-${{ needs.talos.outputs.tag }}${{ inputs.dtb_eee_broken && '-eee-broken' || '' }}${{ inputs.extra_kernel_args && '-kargs' || '' }}
+          name: talos-${{ env.OVERLAY_NAME }}-${{ needs.talos.outputs.tag }}${{ inputs.dtb_eee_broken && '-eee-broken' || '' }}${{ inputs.dtb_pcie_gen1 && '-pcie-gen1' || '' }}${{ inputs.extra_kernel_args && '-kargs' || '' }}
           path: _out/metal-arm64.raw.*
           if-no-files-found: error
           compression-level: 0
